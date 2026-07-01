@@ -1,0 +1,221 @@
+.vehicles-page{
+  width:100%;
+
+  min-height:100vh;
+
+  padding:140px 8%;
+
+  background:#F8FAFC;
+}
+
+/* HEADER */
+
+.page-header{
+  text-align:center;
+
+  margin-bottom:80px;
+}
+
+.page-header p{
+  color:#64748B;
+
+  letter-spacing:3px;
+
+  margin-bottom:20px;
+
+  font-size:14px;
+
+  text-transform:uppercase;
+}
+
+.page-header h1{
+  font-size:58px;
+
+  color:#0F172A;
+
+  font-weight:700;
+}
+
+.page-header span{
+  display:block;
+
+  margin-top:24px;
+
+  max-width:760px;
+
+  margin-inline:auto;
+
+  color:#64748B;
+
+  line-height:1.9;
+
+  font-size:18px;
+}
+
+/* GRID */
+
+.vehicle-page-grid{
+  display:grid;
+
+  grid-template-columns:
+  repeat(auto-fit,minmax(350px,1fr));
+
+  gap:34px;
+}
+
+/* CARD */
+
+.vehicle-page-card{
+  background:white;
+
+  border-radius:30px;
+
+  overflow:hidden;
+
+  transition:0.35s;
+
+  box-shadow:
+  0 10px 40px rgba(0,0,0,0.08);
+}
+
+.vehicle-page-card:hover{
+  transform:translateY(-8px);
+}
+
+/* IMAGE */
+
+.vehicle-page-image{
+  height:260px;
+
+  background-size:cover;
+  background-position:center;
+}
+
+/* CONTENT */
+
+.vehicle-page-content{
+  padding:30px;
+}
+
+/* COMPANY */
+
+.company{
+  color:#64748B;
+
+  font-size:14px;
+
+  letter-spacing:2px;
+
+  margin-bottom:10px;
+
+  text-transform:uppercase;
+}
+
+/* TITLE */
+
+.vehicle-top h2{
+  font-size:30px;
+
+  color:#0F172A;
+
+  line-height:1.3;
+}
+
+/* SPECS */
+
+.specs{
+  display:flex;
+
+  gap:12px;
+
+  flex-wrap:wrap;
+
+  margin-top:24px;
+}
+
+.specs span{
+  padding:10px 16px;
+
+  background:#F1F5F9;
+
+  border-radius:12px;
+
+  color:#0F172A;
+
+  font-size:14px;
+
+  font-weight:500;
+}
+
+/* DESCRIPTION */
+
+.vehicle-description{
+  margin-top:24px;
+
+  color:#64748B;
+
+  line-height:1.9;
+}
+
+/* PRICE SECTION */
+
+.price-section{
+  display:flex;
+
+  justify-content:space-between;
+  align-items:center;
+
+  margin-top:32px;
+}
+
+/* PRICE */
+
+.price-section h3{
+  font-size:28px;
+
+  color:#0F172A;
+}
+
+/* BUTTON */
+
+.price-section button{
+  height:52px;
+
+  padding:0 24px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:#0F172A;
+
+  color:white;
+
+  font-size:15px;
+
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:0.3s;
+}
+
+.price-section button:hover{
+  transform:translateY(-2px);
+
+  background:#111827;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:700px){
+
+  .page-header h1{
+    font-size:40px;
+  }
+
+  .vehicle-page-grid{
+    grid-template-columns:1fr;
+  }
+
+}

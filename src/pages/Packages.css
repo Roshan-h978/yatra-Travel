@@ -1,0 +1,195 @@
+.packages-page{
+  width:100%;
+
+  min-height:100vh;
+
+  padding:140px 8%;
+
+  background:#F8FAFC;
+}
+
+/* HEADER */
+
+.packages-header{
+  text-align:center;
+
+  margin-bottom:80px;
+}
+
+.packages-header p{
+  color:#64748B;
+
+  letter-spacing:3px;
+
+  margin-bottom:20px;
+
+  font-size:14px;
+
+  text-transform:uppercase;
+}
+
+.packages-header h1{
+  font-size:58px;
+
+  color:#0F172A;
+
+  font-weight:700;
+}
+
+.packages-header span{
+  display:block;
+
+  margin-top:24px;
+
+  max-width:760px;
+
+  margin-inline:auto;
+
+  color:#64748B;
+
+  line-height:1.9;
+
+  font-size:18px;
+}
+
+/* GRID */
+
+.package-grid{
+  display:grid;
+
+  grid-template-columns:
+  repeat(auto-fit,minmax(360px,1fr));
+
+  gap:34px;
+}
+
+/* CARD */
+
+.package-card{
+  background:white;
+
+  border-radius:30px;
+
+  overflow:hidden;
+
+  transition:0.35s;
+
+  box-shadow:
+  0 10px 40px rgba(0,0,0,0.08);
+}
+
+.package-card:hover{
+  transform:translateY(-8px);
+}
+
+/* IMAGE */
+
+.package-image{
+  height:260px;
+
+  background-size:cover;
+  background-position:center;
+}
+
+/* CONTENT */
+
+.package-content{
+  padding:30px;
+}
+
+/* TOP */
+
+.package-top p{
+  color:#64748B;
+
+  font-size:14px;
+
+  letter-spacing:2px;
+
+  margin-bottom:10px;
+
+  text-transform:uppercase;
+}
+
+.package-top h2{
+  font-size:30px;
+
+  color:#0F172A;
+
+  line-height:1.3;
+}
+
+/* DESCRIPTION */
+
+.package-description{
+  display:block;
+
+  margin-top:24px;
+
+  color:#64748B;
+
+  line-height:1.9;
+}
+
+/* BOTTOM */
+
+.package-bottom{
+  display:flex;
+
+  justify-content:space-between;
+  align-items:center;
+
+  margin-top:32px;
+}
+
+/* PRICE */
+
+.package-bottom h3{
+  font-size:28px;
+
+  color:#0F172A;
+}
+
+/* BUTTON */
+
+.package-bottom button{
+  height:52px;
+
+  padding:0 24px;
+
+  border:none;
+
+  border-radius:14px;
+
+  background:#0F172A;
+
+  color:white;
+
+  font-size:15px;
+
+  font-weight:600;
+
+  cursor:pointer;
+
+  transition:0.3s;
+}
+
+.package-bottom button:hover{
+  transform:translateY(-2px);
+
+  background:#111827;
+}
+
+/* RESPONSIVE */
+
+@media(max-width:700px){
+
+  .packages-header h1{
+    font-size:40px;
+  }
+
+  .package-grid{
+    grid-template-columns:1fr;
+  }
+
+}
