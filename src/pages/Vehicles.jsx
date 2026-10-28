@@ -1,6 +1,7 @@
 import { useEffect,useState }
-
 from "react";
+
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import API from "../api/api";
 
@@ -12,7 +13,15 @@ from "../components/Footer/Footer";
 
 import "./Vehicles.css";
 
+const VEHICLE_TYPES = ["SUV", "Luxury", "Jeep", "Bike"];
+
 function Vehicles() {
+
+  const navigate = useNavigate();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const type = searchParams.get("type") || "";
 
   const [vehicles,setVehicles] =
   useState([]);
@@ -20,24 +29,23 @@ function Vehicles() {
   const [loading,setLoading] =
   useState(true);
 
+  const [error,setError] =
+  useState("");
+
   /* FETCH VEHICLES */
 
-  async function fetchVehicles(){
-    try{
-      const response = await API.get("/vehicles/");
-      setVehicles(response.data);
-    }
-    catch(error){
-      console.log(error);
-    }
-    finally{
-      setLoading(false);
-    }
-  }
-
   useEffect(()=>{
-    fetchVehicles();
+
+    API.get("/vehicles/")
+      .then((response)=>setVehicles(response.data))
+      .catch(()=>setError("Could not load vehicles. Please try again later."))
+      .finally(()=>setLoading(false));
+
   },[]);
+
+  const visibleVehicles = type
+    ? vehicles.filter((v)=>v.vehicle_type === type)
+    : vehicles;
 
   return (
 
@@ -69,26 +77,38 @@ function Vehicles() {
 
         </div>
 
-        {/* LOADING */}
+        {/* FILTER */}
 
-        {loading && (
+        <div className="filter-chip-row">
 
-          <h2
-            style={{
-              textAlign:"center",
-              marginTop:"60px"
-            }}
-          >
-            Loading Vehicles...
-          </h2>
+          {["", ...VEHICLE_TYPES].map((t)=>(
 
-        )}
+            <button
+              key={t || "all"}
+              type="button"
+              className={`filter-tab ${type === t ? "active" : ""}`}
+              onClick={()=>setSearchParams(t ? { type:t } : {})}
+            >
+              {t || "All"}
+            </button>
+
+          ))}
+
+        </div>
 
         {/* GRID */}
 
         <div className="vehicle-page-grid">
 
-          {vehicles.map((vehicle)=>(
+          {loading && <p className="state-message">Loading vehicles...</p>}
+
+          {error && <p className="state-message">{error}</p>}
+
+          {!loading && !error && visibleVehicles.length === 0 && (
+            <p className="state-message">No vehicles found.</p>
+          )}
+
+          {visibleVehicles.map((vehicle)=>(
 
             <div
               className="vehicle-page-card"
@@ -99,30 +119,31 @@ function Vehicles() {
 
               <div
                 className="vehicle-page-image"
-                style={{
+                style={
+                  vehicle.image
+                    ? { backgroundImage:`url(${vehicle.image})` }
+                    : undefined
+                }
+              >
 
-                  backgroundImage:
-                  `url(${vehicle.image})`
+                <span className={`vehicle-status-badge ${vehicle.status.toLowerCase()}`}>
+                  {vehicle.status}
+                </span>
 
-                }}
-              ></div>
+              </div>
 
               {/* CONTENT */}
 
               <div className="vehicle-page-content">
 
                 <p className="company">
-
-                  {vehicle.company}
-
+                  {vehicle.brand} · {vehicle.rental_type}
                 </p>
 
                 <div className="vehicle-top">
 
                   <h2>
-
                     {vehicle.name}
-
                   </h2>
 
                 </div>
@@ -132,21 +153,15 @@ function Vehicles() {
                 <div className="specs">
 
                   <span>
-
                     {vehicle.fuel_type}
-
                   </span>
 
                   <span>
-
                     {vehicle.seats} Seats
-
                   </span>
 
                   <span>
-
                     {vehicle.transmission}
-
                   </span>
 
                 </div>
@@ -154,9 +169,7 @@ function Vehicles() {
                 {/* DESCRIPTION */}
 
                 <p className="vehicle-description">
-
                   {vehicle.description}
-
                 </p>
 
                 {/* PRICE */}
@@ -164,15 +177,15 @@ function Vehicles() {
                 <div className="price-section">
 
                   <h3>
-
-                    NPR {vehicle.price_per_day}/day
-
+                    NPR {vehicle.price_per_day.toLocaleString()}/day
                   </h3>
 
-                  <button>
-
-                    Book Now
-
+                  <button
+                    type="button"
+                    disabled={vehicle.status === "Maintenance"}
+                    onClick={()=>navigate(`/booking?vehicle=${vehicle.id}`)}
+                  >
+                    {vehicle.status === "Maintenance" ? "Unavailable" : "Book Now"}
                   </button>
 
                 </div>

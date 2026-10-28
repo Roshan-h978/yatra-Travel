@@ -3,7 +3,7 @@
 
   min-height:100vh;
 
-  padding:140px 8%;
+  padding:var(--page-pad-top) var(--page-pad-x) var(--section-pad-y);
 
   background:#F8FAFC;
 }
@@ -29,7 +29,7 @@
 }
 
 .page-header h1{
-  font-size:58px;
+  font-size:var(--fs-page-title);
 
   color:#0F172A;
 
@@ -58,7 +58,7 @@
   display:grid;
 
   grid-template-columns:
-  repeat(auto-fit,minmax(350px,1fr));
+  repeat(auto-fit,minmax(min(100%,350px),1fr));
 
   gap:34px;
 }
@@ -114,7 +114,7 @@
 /* TITLE */
 
 .vehicle-top h2{
-  font-size:30px;
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 
@@ -171,7 +171,7 @@
 /* PRICE */
 
 .price-section h3{
-  font-size:28px;
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 }
@@ -211,11 +211,46 @@
 @media(max-width:700px){
 
   .page-header h1{
-    font-size:40px;
+    font-size:var(--fs-page-title);
   }
 
   .vehicle-page-grid{
     grid-template-columns:1fr;
   }
 
+}
+
+/* STATUS BADGE */
+
+.vehicle-page-image{
+  position:relative;
+  background-color:#E2E8F0;
+}
+
+.vehicle-status-badge{
+  position:absolute;
+  top:16px;
+  left:16px;
+  padding:6px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  background:#ECFDF5;
+  color:#047857;
+}
+
+.vehicle-status-badge.booked{
+  background:#FFF7ED;
+  color:#C2410C;
+}
+
+.vehicle-status-badge.maintenance{
+  background:#FEF2F2;
+  color:#B91C1C;
+}
+
+.price-section button:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+  transform:none;
 }

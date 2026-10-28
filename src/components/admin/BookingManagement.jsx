@@ -1,208 +1,222 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import API from "../../api/api";
+import API, { getErrorMessage } from "../../api/api";
 
-function BookingManagement(){
+import { FiCheck, FiFlag, FiMap, FiRotateCcw, FiSlash, FiTrash2, FiTruck, FiX } from "react-icons/fi";
 
-  const [bookings,setBookings] =
-  useState([]);
+import { StatusPill } from "./CrudSection";
 
-  useEffect(()=>{
+import useAdminData from "./useAdminData";
 
-    fetchBookings();
+const STATUSES = ["Pending", "Approved", "Rejected", "Completed", "Cancelled"];
 
-  },[]);
+function BookingManagement() {
 
-  async function fetchBookings(){
+  const { data: bookings, loading, error, reload } = useAdminData("/bookings/");
 
-    try{
+  const { data: drivers } = useAdminData("/drivers/");
 
-      const response =
-      await API.get("/bookings/");
+  const [filter, setFilter] = useState("All");
 
-      setBookings(response.data);
+  const [message, setMessage] = useState(null);
 
-    }
+  const [busyId, setBusyId] = useState(null);
 
-    catch(error){
+  async function updateBooking(id, changes, successText) {
 
-      console.log(error);
+    setBusyId(id);
+    setMessage(null);
 
-    }
+    try {
 
-  }
+      await API.put(`/bookings/update/${id}/`, changes);
+      setMessage({ type: "success", text: successText });
+      reload();
 
-  async function updateStatus(id,status){
+    } catch (err) {
 
-    try{
+      setMessage({ type: "error", text: getErrorMessage(err, "Update failed.") });
 
-      await API.put(
+    } finally {
 
-        `/bookings/update/${id}/`,
-
-        {
-
-          status
-
-        }
-
-      );
-
-      fetchBookings();
-
-    }
-
-    catch(error){
-
-      console.log(error);
+      setBusyId(null);
 
     }
 
   }
 
-  async function deleteBooking(id){
+  async function deleteBooking(id) {
 
-    try{
+    if (!window.confirm("Delete this booking? This cannot be undone.")) return;
 
-      await API.delete(
+    try {
 
-        `/bookings/delete/${id}/`
+      await API.delete(`/bookings/delete/${id}/`);
+      setMessage({ type: "success", text: "Booking deleted." });
+      reload();
 
-      );
+    } catch (err) {
 
-      fetchBookings();
-
-    }
-
-    catch(error){
-
-      console.log(error);
+      setMessage({ type: "error", text: getErrorMessage(err, "Delete failed.") });
 
     }
 
   }
 
-  return(
+  const visible = filter === "All" ? bookings : bookings.filter((b) => b.status === filter);
 
-    <section className="dashboard-section">
+  return (
 
-      <div className="section-header">
+    <section className="admin-section">
 
-        <h2>
+      <div className="admin-section-header">
 
-          Booking Management
+        <div>
+          <h2>Booking Management</h2>
+          <p>Approve requests, assign drivers and track trips. Customers are emailed on every status change.</p>
+        </div>
 
-        </h2>
+        <div className="admin-filter-row">
+          {["All", ...STATUSES].map((s) => (
+            <button
+              key={s}
+              type="button"
+              className={`admin-btn admin-btn--sm ${filter === s ? "admin-btn--dark" : "admin-btn--ghost"}`}
+              onClick={() => setFilter(s)}
+            >
+              {s}{s !== "All" ? ` (${bookings.filter((b) => b.status === s).length})` : ""}
+            </button>
+          ))}
+        </div>
 
       </div>
 
-      <table>
+      {message && <div className={`admin-alert admin-alert--${message.type}`} role="status">{message.text}</div>}
 
-        <thead>
+      <div className="admin-table-wrap">
 
-          <tr>
+        <table className="admin-table">
 
-            <th>Customer</th>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Customer</th>
+              <th>Booking</th>
+              <th>Dates</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Driver</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
 
-            <th>Email</th>
+          <tbody>
 
-            <th>Status</th>
+            {loading && <tr><td className="admin-table-empty" colSpan={8}>Loading bookings...</td></tr>}
 
-            <th>Pickup</th>
+            {!loading && error && <tr><td className="admin-table-empty" colSpan={8}>{error}</td></tr>}
 
-            <th>Return</th>
+            {!loading && !error && visible.length === 0 && (
+              <tr><td className="admin-table-empty" colSpan={8}>No bookings found.</td></tr>
+            )}
 
-            <th>Actions</th>
+            {!loading && !error && visible.map((b) => (
 
-          </tr>
+              <tr key={b.id}>
 
-        </thead>
+                <td data-label="#"><div className="admin-cell">{b.id}</div></td>
 
-        <tbody>
+                <td data-label="Customer"><div className="admin-cell">
+                  <strong>{b.full_name}</strong>
+                  <span className="admin-muted">{b.email}</span>
+                  <span className="admin-muted">{b.phone}</span>
+                </div></td>
 
-          {
+                <td data-label="Booking"><div className="admin-cell">
+                  {b.vehicle_name && <span className="admin-inline-icon"><FiTruck aria-hidden="true" /> {b.vehicle_name}</span>}
+                  {b.package_title && <span className={b.vehicle_name ? "admin-muted" : ""}><FiMap aria-hidden="true" /> {b.package_title}</span>}
+                  {b.special_request && <span className="admin-muted" title={b.special_request}>“{b.special_request.slice(0, 40)}{b.special_request.length > 40 ? "…" : ""}”</span>}
+                </div></td>
 
-            bookings.map((booking)=>(
+                <td data-label="Dates"><div className="admin-cell">
+                  {b.pickup_date}
+                  <span className="admin-muted">to {b.return_date}</span>
+                </div></td>
 
-              <tr key={booking.id}>
+                <td data-label="Total"><div className="admin-cell">NPR {b.total_price.toLocaleString()}</div></td>
 
-                <td>
+                <td data-label="Status"><div className="admin-cell"><StatusPill value={b.status} /></div></td>
 
-                  {booking.full_name}
-
-                </td>
-
-                <td>
-
-                  {booking.email}
-
-                </td>
-
-                <td>
-
-                  {booking.status}
-
-                </td>
-
-                <td>
-
-                  {booking.pickup_date}
-
-                </td>
-
-                <td>
-
-                  {booking.return_date}
-
-                </td>
-
-                <td>
-
-                  <button
-                    onClick={()=>updateStatus(
-
-                      booking.id,
-
-                      "Approved"
-
-                    )}
+                <td data-label="Driver"><div className="admin-cell">
+                  <select
+                    aria-label="Assign driver"
+                    value={b.driver || ""}
+                    disabled={busyId === b.id}
+                    onChange={(e) => updateBooking(b.id, { driver: e.target.value || null }, "Driver updated.")}
                   >
-                    Approve
-                  </button>
-
-                  <button
-                    onClick={()=>updateStatus(
-
-                      booking.id,
-
-                      "Rejected"
-
+                    <option value="">Unassigned</option>
+                    {b.driver && !drivers.some((d) => d.id === b.driver) && (
+                      <option value={b.driver}>{b.driver_name}</option>
                     )}
-                  >
-                    Reject
-                  </button>
+                    {drivers.map((d) => (
+                      <option key={d.id} value={d.id}>{d.full_name} ({d.status})</option>
+                    ))}
+                  </select>
+                </div></td>
 
-                  <button
-                    onClick={()=>deleteBooking(
+                <td data-label="Actions"><div className="admin-cell">
+                  <div className="admin-actions">
 
-                      booking.id
-
+                    {b.status === "Pending" && (
+                      <>
+                        <button type="button" className="admin-btn admin-btn--success admin-btn--sm" disabled={busyId === b.id}
+                          onClick={() => updateBooking(b.id, { status: "Approved" }, "Booking approved.")}>
+                          <FiCheck aria-hidden="true" /> Approve
+                        </button>
+                        <button type="button" className="admin-btn admin-btn--danger admin-btn--sm" disabled={busyId === b.id}
+                          onClick={() => updateBooking(b.id, { status: "Rejected" }, "Booking rejected.")}>
+                          <FiX aria-hidden="true" /> Reject
+                        </button>
+                      </>
                     )}
-                  >
-                    Delete
-                  </button>
 
-                </td>
+                    {b.status === "Approved" && (
+                      <>
+                        <button type="button" className="admin-btn admin-btn--dark admin-btn--sm" disabled={busyId === b.id}
+                          onClick={() => updateBooking(b.id, { status: "Completed" }, "Booking marked completed.")}>
+                          <FiFlag aria-hidden="true" /> Complete
+                        </button>
+                        <button type="button" className="admin-btn admin-btn--danger admin-btn--sm" disabled={busyId === b.id}
+                          onClick={() => window.confirm("Cancel this approved booking? The customer will be emailed.") &&
+                            updateBooking(b.id, { status: "Rejected" }, "Booking cancelled.")}>
+                          <FiSlash aria-hidden="true" /> Cancel
+                        </button>
+                      </>
+                    )}
+
+                    {b.status === "Rejected" && (
+                      <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" disabled={busyId === b.id}
+                        onClick={() => updateBooking(b.id, { status: "Pending" }, "Booking reopened.")}>
+                        <FiRotateCcw aria-hidden="true" /> Reopen
+                      </button>
+                    )}
+
+                    <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" onClick={() => deleteBooking(b.id)}>
+                      <FiTrash2 aria-hidden="true" /> Delete
+                    </button>
+
+                  </div>
+                </div></td>
 
               </tr>
 
-            ))
+            ))}
 
-          }
+          </tbody>
 
-        </tbody>
+        </table>
 
-      </table>
+      </div>
 
     </section>
 

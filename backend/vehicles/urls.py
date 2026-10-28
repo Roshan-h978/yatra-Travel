@@ -2,39 +2,16 @@ from django.urls import path
 
 from .views import *
 
-
 urlpatterns = [
 
-    path(
+    path("", get_vehicles),
 
-        "",
+    path("<int:id>/", get_vehicle),
 
-        get_vehicles
+    path("add/", add_vehicle),
 
-    ),
+    path("update/<int:id>/", update_vehicle),
 
-    path(
-
-        "add/",
-
-        add_vehicle
-
-    ),
-
-    path(
-
-        "update/<int:id>/",
-
-        update_vehicle
-
-    ),
-
-    path(
-
-        "delete/<int:id>/",
-
-        delete_vehicle
-
-    ),
+    path("delete/<int:id>/", delete_vehicle),
 
 ]

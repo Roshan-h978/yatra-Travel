@@ -1,350 +1,125 @@
-import "./DashboardOverview.css";
+import { FiCalendar, FiClock, FiDollarSign, FiMap, FiTruck, FiUsers, FiArrowRight, FiCornerUpLeft } from "react-icons/fi";
 
-function DashboardOverview(){
+import { StatusPill } from "./CrudSection";
+
+import StatCard from "./StatCard";
+
+import useAdminData from "./useAdminData";
+
+function DashboardOverview({ onNavigate }) {
+
+  const { data: stats, loading, error } = useAdminData("/support/analytics/", null);
+
+  const { data: bookings, loading: bookingsLoading, error: bookingsError } = useAdminData("/bookings/");
+
+  const { data: messages, loading: messagesLoading, error: messagesError } = useAdminData("/support/");
+
+  const recentBookings = bookings.slice(0, 5);
+
+  const openMessages = messages.filter((m) => m.status === "Pending").slice(0, 5);
 
   return (
 
-    <div className="dashboard-overview">
+    <section className="admin-section">
 
-      {/* HEADER */}
-
-      <div className="dashboard-header">
+      <div className="admin-section-header">
 
         <div>
-
-          <h1>
-
-            Dashboard Overview
-
-          </h1>
-
-          <p>
-
-            Welcome back to the Yatra Admin Panel
-
-          </p>
-
+          <h2>Dashboard Overview</h2>
+          <p>Live summary of bookings, fleet and customer activity.</p>
         </div>
 
-        <button className="dashboard-btn">
-
-          Generate Report
-
+        <button type="button" className="admin-btn admin-btn--primary" onClick={() => onNavigate("bookings")}>
+          Manage Bookings <FiArrowRight aria-hidden="true" />
         </button>
 
       </div>
 
-      {/* STATS */}
+      {loading && <p className="admin-loading-text">Loading summary...</p>}
 
-      <div className="stats-grid">
+      {error && <div className="admin-alert admin-alert--error">{error}</div>}
 
-        {/* BOOKINGS */}
+      {stats && (
 
-        <div className="stat-card bookings">
+        <div className="admin-stats-grid">
 
-          <div className="stat-top">
+          <StatCard icon={FiCalendar} tone="blue" label="Total Bookings" value={stats.total_bookings} />
 
-            <span className="stat-icon">
+          <StatCard icon={FiClock} tone="amber" label="Pending Approval" value={stats.pending_bookings} />
 
-              📅
+          <StatCard icon={FiDollarSign} tone="green" label="Revenue" value={`NPR ${stats.total_revenue.toLocaleString()}`} />
 
-            </span>
+          <StatCard icon={FiUsers} tone="purple" label="Customers" value={stats.total_customers} />
 
-            <span className="growth positive">
+          <StatCard icon={FiTruck} label="Vehicles Available" value={`${stats.available_vehicles} / ${stats.total_vehicles}`} />
 
-              +12%
-
-            </span>
-
-          </div>
-
-          <h2>
-
-            1,245
-
-          </h2>
-
-          <p>
-
-            Total Bookings
-
-          </p>
+          <StatCard icon={FiMap} tone="blue" label="Tour Packages" value={stats.total_packages} />
 
         </div>
 
-        {/* VEHICLES */}
+      )}
 
-        <div className="stat-card vehicles">
+      <div className="admin-grid-2">
 
-          <div className="stat-top">
+        <div className="admin-card">
 
-            <span className="stat-icon">
+          <h3>Recent Bookings</h3>
 
-              🚘
+          {bookingsLoading && <p className="admin-loading-text">Loading...</p>}
 
-            </span>
+          {bookingsError && <div className="admin-alert admin-alert--error">{bookingsError}</div>}
 
-            <span className="growth positive">
+          {!bookingsLoading && !bookingsError && recentBookings.length === 0 && <p className="admin-loading-text">No bookings yet.</p>}
 
-              +8%
+          <div className="admin-list">
 
-            </span>
+            {recentBookings.map((b) => (
 
-          </div>
+              <div className="admin-list-item" key={b.id}>
 
-          <h2>
+                <div>
+                  <h4>{b.full_name}</h4>
+                  <p>{b.vehicle_name || b.package_title} · {b.pickup_date} → {b.return_date}</p>
+                </div>
 
-            120
-
-          </h2>
-
-          <p>
-
-            Luxury Vehicles
-
-          </p>
-
-        </div>
-
-        {/* PACKAGES */}
-
-        <div className="stat-card packages">
-
-          <div className="stat-top">
-
-            <span className="stat-icon">
-
-              🌍
-
-            </span>
-
-            <span className="growth positive">
-
-              +5%
-
-            </span>
-
-          </div>
-
-          <h2>
-
-            48
-
-          </h2>
-
-          <p>
-
-            Tour Packages
-
-          </p>
-
-        </div>
-
-        {/* REVENUE */}
-
-        <div className="stat-card revenue">
-
-          <div className="stat-top">
-
-            <span className="stat-icon">
-
-              💰
-
-            </span>
-
-            <span className="growth positive">
-
-              +21%
-
-            </span>
-
-          </div>
-
-          <h2>
-
-            NPR 12.5L
-
-          </h2>
-
-          <p>
-
-            Monthly Revenue
-
-          </p>
-
-        </div>
-
-      </div>
-
-      {/* LOWER SECTION */}
-
-      <div className="dashboard-lower">
-
-        {/* RECENT ACTIVITY */}
-
-        <div className="dashboard-card activity-card">
-
-          <div className="card-header">
-
-            <h3>
-
-              Recent Activity
-
-            </h3>
-
-          </div>
-
-          <div className="activity-list">
-
-            <div className="activity-item">
-
-              <div className="activity-dot green"></div>
-
-              <div>
-
-                <h4>
-
-                  New Booking Confirmed
-
-                </h4>
-
-                <p>
-
-                  Toyota Prado booked for Pokhara Tour
-
-                </p>
+                <StatusPill value={b.status} />
 
               </div>
 
-            </div>
-
-            <div className="activity-item">
-
-              <div className="activity-dot blue"></div>
-
-              <div>
-
-                <h4>
-
-                  New Customer Registered
-
-                </h4>
-
-                <p>
-
-                  Alex Johnson created a new account
-
-                </p>
-
-              </div>
-
-            </div>
-
-            <div className="activity-item">
-
-              <div className="activity-dot red"></div>
-
-              <div>
-
-                <h4>
-
-                  Booking Cancelled
-
-                </h4>
-
-                <p>
-
-                  Mustang tour booking was cancelled
-
-                </p>
-
-              </div>
-
-            </div>
+            ))}
 
           </div>
 
         </div>
 
-        {/* QUICK STATS */}
+        <div className="admin-card">
 
-        <div className="dashboard-card quick-card">
+          <h3>Support Messages Awaiting Reply</h3>
 
-          <div className="card-header">
+          {messagesLoading && <p className="admin-loading-text">Loading...</p>}
 
-            <h3>
+          {messagesError && <div className="admin-alert admin-alert--error">{messagesError}</div>}
 
-              Quick Stats
+          {!messagesLoading && !messagesError && openMessages.length === 0 && <p className="admin-loading-text">All caught up.</p>}
 
-            </h3>
+          <div className="admin-list">
 
-          </div>
+            {openMessages.map((m) => (
 
-          <div className="quick-stats">
+              <div className="admin-list-item" key={m.id}>
 
-            <div className="quick-stat">
+                <div>
+                  <h4>{m.subject}</h4>
+                  <p>{m.customer_name} · {new Date(m.created_at).toLocaleDateString()}</p>
+                </div>
 
-              <span>
+                <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" onClick={() => onNavigate("support")}>
+                  <FiCornerUpLeft aria-hidden="true" /> Reply
+                </button>
 
-                Pending Approvals
+              </div>
 
-              </span>
-
-              <h4>
-
-                18
-
-              </h4>
-
-            </div>
-
-            <div className="quick-stat">
-
-              <span>
-
-                Active Drivers
-
-              </span>
-
-              <h4>
-
-                36
-
-              </h4>
-
-            </div>
-
-            <div className="quick-stat">
-
-              <span>
-
-                Customer Reviews
-
-              </span>
-
-              <h4>
-
-                324
-
-              </h4>
-
-            </div>
-
-            <div className="quick-stat">
-
-              <span>
-
-                Support Tickets
-
-              </span>
-
-              <h4>
-
-                7
-
-              </h4>
-
-            </div>
+            ))}
 
           </div>
 
@@ -352,7 +127,7 @@ function DashboardOverview(){
 
       </div>
 
-    </div>
+    </section>
 
   );
 

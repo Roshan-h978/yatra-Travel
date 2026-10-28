@@ -1,272 +1,118 @@
 import "./Sidebar.css";
 
-import {
+import { useNavigate } from "react-router-dom";
 
-  useNavigate
+import { FiLogOut, FiX } from "react-icons/fi";
 
-}
+import { clearAuth, getStoredUser } from "../../api/api";
 
-from "react-router-dom";
+import ADMIN_MENU from "./adminMenu";
 
-function Sidebar({
-
-  activeSection,
-
-  setActiveSection
-
-}) {
+function Sidebar({ activeSection, onSelect, open, onClose }) {
 
   const navigate = useNavigate();
 
-  /* =========================
-     MENU ITEMS
-  ========================= */
+  const user = getStoredUser();
 
-  const menuItems = [
+  const name = user?.name || user?.email || "Admin";
 
-    {
+  function handleLogout() {
 
-      id:"dashboard",
+    clearAuth();
 
-      title:"Dashboard",
-
-      icon:"📊"
-
-    },
-
-    {
-
-      id:"vehicles",
-
-      title:"Vehicles",
-
-      icon:"🚘"
-
-    },
-
-    {
-
-      id:"packages",
-
-      title:"Packages",
-
-      icon:"🌍"
-
-    },
-
-    {
-
-      id:"bookings",
-
-      title:"Bookings",
-
-      icon:"📅"
-
-    },
-
-    {
-
-      id:"drivers",
-
-      title:"Drivers",
-
-      icon:"🧑‍✈️"
-
-    },
-
-    {
-
-      id:"customers",
-
-      title:"Customers",
-
-      icon:"👥"
-
-    },
-
-    {
-
-      id:"reviews",
-
-      title:"Reviews",
-
-      icon:"⭐"
-
-    },
-
-    {
-
-      id:"analytics",
-
-      title:"Analytics",
-
-      icon:"📈"
-
-    },
-
-    {
-
-      id:"support",
-
-      title:"Support",
-
-      icon:"💬"
-
-    }
-
-  ];
-
-  /* =========================
-     LOGOUT
-  ========================= */
-
-  function handleLogout(){
-
-    localStorage.clear();
-
-    navigate("/login");
-
-    window.location.reload();
+    navigate("/login", { replace: true });
 
   }
 
   return (
 
-    <aside className="admin-sidebar">
+    <>
 
-      {/* =========================
-          LOGO
-      ========================= */}
+      {/* Dark backdrop behind the drawer on small screens */}
+      <div
+        className={`admin-sidebar-backdrop ${open ? "show" : ""}`}
+        onClick={onClose}
+        aria-hidden="true"
+      />
 
-      <div className="admin-logo">
+      <aside className={`admin-sidebar ${open ? "open" : ""}`}>
 
-        <div className="logo-circle">
+        {/* LOGO */}
 
-          Y
+        <div className="admin-logo">
+
+          <div className="logo-circle">Y</div>
+
+          <div className="admin-logo-text">
+            <h1>YATRA</h1>
+            <span>Admin Panel</span>
+          </div>
+
+          <button
+            type="button"
+            className="admin-sidebar-close"
+            aria-label="Close menu"
+            onClick={onClose}
+          >
+            <FiX />
+          </button>
 
         </div>
 
-        <div>
+        {/* MENU */}
 
-          <h1>
+        <nav className="admin-menu" aria-label="Admin sections">
 
-            YATRA
+          <p className="admin-menu-label">Menu</p>
 
-          </h1>
-
-          <span>
-
-            ADMIN PANEL
-
-          </span>
-
-        </div>
-
-      </div>
-
-      {/* =========================
-          MENU
-      ========================= */}
-
-      <div className="admin-menu">
-
-        {
-
-          menuItems.map((item)=>(
+          {ADMIN_MENU.map(({ id, title, icon: Icon }) => (
 
             <button
-
-              key={item.id}
-
-              className={
-
-                activeSection === item.id
-
-                ?
-
-                "admin-menu-item active"
-
-                :
-
-                "admin-menu-item"
-
-              }
-
-              onClick={()=>
-
-                setActiveSection(item.id)
-
-              }
-
+              key={id}
+              type="button"
+              aria-current={activeSection === id ? "page" : undefined}
+              className={`admin-menu-item ${activeSection === id ? "active" : ""}`}
+              onClick={() => onSelect(id)}
             >
-
-              <span className="menu-icon">
-
-                {item.icon}
-
-              </span>
-
-              <span>
-
-                {item.title}
-
-              </span>
-
+              <Icon className="menu-icon" aria-hidden="true" />
+              <span>{title}</span>
             </button>
 
-          ))
+          ))}
 
-        }
+        </nav>
 
-      </div>
+        {/* FOOTER */}
 
-      {/* =========================
-          FOOTER
-      ========================= */}
+        <div className="sidebar-footer">
 
-      <div className="sidebar-footer">
+          <div className="admin-user">
 
-        <div className="admin-user">
+            <div className="sidebar-avatar">
+              {name.charAt(0).toUpperCase()}
+            </div>
 
-          <div className="admin-avatar">
-
-            A
-
-          </div>
-
-          <div>
-
-            <h4>
-
-              Admin
-
-            </h4>
-
-            <span>
-
-              Super Administrator
-
-            </span>
+            <div className="admin-user-text">
+              <h4>{name}</h4>
+              <span>{user?.is_superuser ? "Super Administrator" : "Administrator"}</span>
+            </div>
 
           </div>
+
+          <button
+            type="button"
+            className="sidebar-logout-btn"
+            onClick={handleLogout}
+          >
+            <FiLogOut aria-hidden="true" />
+            Logout
+          </button>
 
         </div>
 
-        <button
+      </aside>
 
-          className="logout-btn"
-
-          onClick={handleLogout}
-
-        >
-
-          Logout
-
-        </button>
-
-      </div>
-
-    </aside>
+    </>
 
   );
 

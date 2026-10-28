@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
+from datetime import timedelta
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +22,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-mime43ha0j+(3tl2asln8b^$am#$yjyfl(s_fni%=sk21o@*k$'
+# Set DJANGO_SECRET_KEY in production. The fallback is for local development only.
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-mime43ha0j+(3tl2asln8b^$am#$yjyfl(s_fni%=sk21o@*k$'
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', '1') == '1'
 
-ALLOWED_HOSTS = []
+if not DEBUG and SECRET_KEY.startswith('django-insecure-'):
+    raise RuntimeError('Set DJANGO_SECRET_KEY when DJANGO_DEBUG is off.')
+
+ALLOWED_HOSTS = os.environ.get(
+    'DJANGO_ALLOWED_HOSTS',
+    'localhost,127.0.0.1'
+).split(',')
 
 
 # Application definition
@@ -84,30 +96,29 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    # Prefer a local SQLite file if present (makes local dev easier).
-}
+# SQLite by default so the project runs out of the box.
+# Set DB_ENGINE=postgres (plus DB_NAME / DB_USER / DB_PASSWORD / DB_HOST / DB_PORT) to use PostgreSQL.
 
-DB_SQLITE = BASE_DIR / 'db.sqlite3'
-
-if DB_SQLITE.exists():
+if os.environ.get('DB_ENGINE') == 'postgres':
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': str(DB_SQLITE),
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.environ.get('DB_NAME', 'yatra_db'),
+            'USER': os.environ.get('DB_USER', 'postgres'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
 else:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'yatra_db',
-            'USER': 'postgres',
-            'PASSWORD': '***REMOVED***',
-            'HOST': 'localhost',
-            'PORT': '5432',
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
         }
     }
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # Password validation
@@ -153,26 +164,59 @@ MEDIA_ROOT = BASE_DIR / 'media'
 REST_FRAMEWORK = {
 
     'DEFAULT_AUTHENTICATION_CLASSES': (
-
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-
     ),
 
+    # Views that should be public declare AllowAny explicitly.
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+
+    # Anonymous visitors and logged-in users are rate limited; login/register
+    # use the stricter "auth" rate (see users.views.AuthRateThrottle).
+    'DEFAULT_THROTTLE_CLASSES': (
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+    ),
+
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': os.environ.get('THROTTLE_ANON', '120/minute'),
+        'user': os.environ.get('THROTTLE_USER', '600/minute'),
+        'auth': os.environ.get('THROTTLE_AUTH', '10/minute'),
+    },
+
 }
-CORS_ALLOW_ALL_ORIGINS = True
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+}
+
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    'CORS_ALLOWED_ORIGINS',
+    'http://localhost:5173,http://127.0.0.1:5173'
+).split(',')
+
+# In development, also accept the Vite dev server on any local port
+# (Vite moves to 5174, 5175, ... when 5173 is already taken).
+if DEBUG:
+    CORS_ALLOWED_ORIGIN_REGEXES = [
+        r'^http://(localhost|127\.0\.0\.1):\d+$',
+    ]
 
 AUTHENTICATION_BACKENDS = [
-
     'users.authentication.EmailOrUsernameModelBackend',
-
-    'django.contrib.auth.backends.ModelBackend',
-
 ]
+
+GOOGLE_CLIENT_ID = os.environ.get(
+    'GOOGLE_CLIENT_ID',
+    '1056481750509-tamjc8high1hpu06vcjs3c806o1st2cv.apps.googleusercontent.com'
+)
+
 # =========================
 # EMAIL CONFIGURATION
 # =========================
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# Emails print to the console unless EMAIL_HOST_USER / EMAIL_HOST_PASSWORD are set.
 
 EMAIL_HOST = 'smtp.gmail.com'
 
@@ -180,6 +224,14 @@ EMAIL_PORT = 587
 
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = 'yourgmail@gmail.com'
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 
-EMAIL_HOST_PASSWORD = 'your_app_password'
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+EMAIL_BACKEND = (
+    'django.core.mail.backends.smtp.EmailBackend'
+    if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD
+    else 'django.core.mail.backends.console.EmailBackend'
+)
+
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@yatra.local'

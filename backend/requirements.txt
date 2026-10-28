@@ -1,7 +1,7 @@
 Django==6.0.5
-djangorestframework
-djangorestframework-simplejwt
-django-cors-headers
-psycopg2-binary
-Pillow
-google-auth
+djangorestframework==3.18.3
+djangorestframework-simplejwt==5.5.1
+django-cors-headers==4.9.0
+psycopg2-binary==2.9.13
+Pillow==13.0.0
+google-auth[requests]==2.62.0

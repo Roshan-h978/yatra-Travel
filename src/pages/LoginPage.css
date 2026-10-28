@@ -66,7 +66,7 @@
 }
 
 .login-content h1{
-  font-size:64px;
+  font-size:var(--fs-page-title);
 
   line-height:1.2;
 
@@ -94,7 +94,7 @@
   justify-content:center;
   align-items:center;
 
-  padding:120px 60px;
+  padding:calc(var(--nav-height) + 32px) var(--page-pad-x) 48px;
 }
 
 /* BOX */
@@ -122,7 +122,7 @@
 }
 
 .login-header h2{
-  font-size:42px;
+  font-size:clamp(24px, 2.6vw, 32px);
 
   color:#0F172A;
 }
@@ -134,45 +134,9 @@
 }
 
 /* ROLE */
-
-.role-selector{
-  display:flex;
-
-  background:#F1F5F9;
-
-  border-radius:16px;
-
-  padding:6px;
-
-  margin-bottom:34px;
-}
-
-.role-selector button{
-  flex:1;
-
-  height:50px;
-
-  border:none;
-
-  border-radius:12px;
-
-  background:transparent;
-
-  cursor:pointer;
-
-  font-size:15px;
-
-  font-weight:600;
-
-  transition:0.3s;
-}
-
-.active-role{
-  background:white !important;
-
-  box-shadow:
-  0 4px 12px rgba(0,0,0,0.06);
-}
+
+
+
 
 /* FORM */
 
@@ -186,7 +150,7 @@
 
 /* GROUP */
 
-.form-group{
+.login-page .form-group{
   display:flex;
 
   flex-direction:column;
@@ -196,7 +160,7 @@
 
 /* LABEL */
 
-.form-group label{
+.login-page .form-group label{
   font-size:15px;
 
   font-weight:600;
@@ -206,7 +170,7 @@
 
 /* INPUT */
 
-.form-group input{
+.login-page .form-group input{
   width:100%;
 
   height:58px;
@@ -226,7 +190,7 @@
   transition:0.3s;
 }
 
-.form-group input:focus{
+.login-page .form-group input:focus{
   background:white;
 
   border:
@@ -234,33 +198,10 @@
 }
 
 /* REMEMBER */
-
-.remember-row{
-  display:flex;
-
-  justify-content:space-between;
-  align-items:center;
-}
-
-.remember-left{
-  display:flex;
-
-  align-items:center;
-
-  gap:10px;
-}
-
-.remember-left span{
-  color:#64748B;
-}
-
-.remember-row a{
-  text-decoration:none;
-
-  color:#0F172A;
-
-  font-weight:600;
-}
+
+
+
+
 
 /* BUTTON */
 
@@ -334,7 +275,7 @@
 @media(max-width:700px){
 
   .login-content h1{
-    font-size:42px;
+    font-size:var(--fs-page-title);
   }
 
   .login-right{
@@ -376,39 +317,11 @@
 }
 
 /* GOOGLE BUTTON */
+
 
-.google-login-btn{
-  width:100%;
 
-  height:56px;
-
-  border:none;
-
-  border-radius:14px;
-
-  background:white;
-
-  border:1px solid #ddd;
-
-  display:flex;
-
-  justify-content:center;
-
-  align-items:center;
-
-  gap:14px;
-
-  cursor:pointer;
-
-  font-size:15px;
-
-  font-weight:600;
-
-  transition:0.3s;
-}
-
-.google-login-btn:hover{
-  transform:translateY(-2px);
-
-  box-shadow:0 10px 25px rgba(0,0,0,0.08);
+.login-btn-main:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none;
 }

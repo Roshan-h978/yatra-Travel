@@ -3,7 +3,7 @@
 
   min-height:100vh;
 
-  padding:140px 8%;
+  padding:var(--page-pad-top) var(--page-pad-x) var(--section-pad-y);
 
   background:#F8FAFC;
 }
@@ -29,7 +29,7 @@
 }
 
 .contact-header h1{
-  font-size:58px;
+  font-size:var(--fs-page-title);
 
   color:#0F172A;
 
@@ -76,7 +76,7 @@
 }
 
 .contact-left h2{
-  font-size:34px;
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 
@@ -95,7 +95,7 @@
 
 /* GROUP */
 
-.form-group{
+.contact-page .form-group{
   display:flex;
 
   flex-direction:column;
@@ -105,7 +105,7 @@
 
 /* LABEL */
 
-.form-group label{
+.contact-page .form-group label{
   font-size:15px;
 
   font-weight:600;
@@ -115,8 +115,8 @@
 
 /* INPUT */
 
-.form-group input,
-.form-group textarea{
+.contact-page .form-group input,
+.contact-page .form-group textarea{
   width:100%;
 
   border:1px solid #E2E8F0;
@@ -136,7 +136,7 @@
 
 /* TEXTAREA */
 
-.form-group textarea{
+.contact-page .form-group textarea{
   min-height:160px;
 
   resize:none;
@@ -144,8 +144,8 @@
 
 /* FOCUS */
 
-.form-group input:focus,
-.form-group textarea:focus{
+.contact-page .form-group input:focus,
+.contact-page .form-group textarea:focus{
   border:
   1px solid #CBD5E1;
 
@@ -206,7 +206,7 @@
 }
 
 .contact-card h3{
-  font-size:30px;
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 
@@ -240,7 +240,7 @@
 /* IMAGE */
 
 .contact-image{
-  height:320px;
+  height:clamp(200px, 24vw, 300px);
 
   border-radius:30px;
 
@@ -267,7 +267,7 @@
 @media(max-width:700px){
 
   .contact-header h1{
-    font-size:40px;
+    font-size:var(--fs-page-title);
   }
 
   .contact-left,
@@ -275,4 +275,10 @@
     padding:28px;
   }
 
+}
+
+.contact-submit-btn:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+  transform:none;
 }

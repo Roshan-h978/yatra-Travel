@@ -1,21 +1,43 @@
 :root{
 
-  --bg:#0F172A;
-
+  /* Brand */
   --primary:#0EA5E9;
-
   --accent:#F97316;
-
   --green:#10B981;
+  --red:#EF4444;
+  --amber:#F59E0B;
 
+  /* Surfaces & text (light site) */
+  --bg:#F8FAFC;
+  --surface:#FFFFFF;
+  --dark:#0F172A;
+  --text:#0F172A;
+  --muted:#64748B;
+  --gray:#94A3B8;
+  --border:#E2E8F0;
   --light:#FFF7ED;
 
-  --text:#080909;
+  /* Shared layout */
+  --nav-height:82px;
+  --page-x:8%;
+  --radius:16px;
+  --shadow:0 10px 30px rgba(15,23,42,0.08);
 
-  --secondary:#111827;
+}
 
-  --gray:#94A3B8;
+/* =========================
+   RESPONSIVE SCALE
+   Sizes grow smoothly from phone (min) to large desktop (max).
+========================= */
 
-  --border:rgba(255,255,255,0.08);
+:root{
+
+  --page-pad-x:clamp(16px, 5vw, 72px);
+  --page-pad-top:calc(var(--nav-height) + clamp(28px, 4vw, 56px));
+  --section-pad-y:clamp(48px, 6vw, 88px);
+
+  --fs-hero:clamp(30px, 4.2vw, 52px);
+  --fs-page-title:clamp(28px, 3.6vw, 46px);
+  --fs-section-title:clamp(26px, 3.2vw, 40px);
 
 }

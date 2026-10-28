@@ -1,48 +1,33 @@
 from django.urls import path
+
 from .analytics_views import dashboard_analytics
 
 from .views import *
 
-
 urlpatterns = [
 
-    path(
+    path("", get_support_messages),
 
-        "",
+    path("create/", create_support_message),
 
-        get_support_messages
+    path("reply/<int:id>/", reply_support_message),
 
-    ),
+    path("close/<int:id>/", close_support_message),
 
-    path(
+    path("delete/<int:id>/", delete_support_message),
 
-        "create/",
+    path("analytics/", dashboard_analytics),
 
-        create_support_message
+    path("reviews/", get_reviews),
 
-    ),
+    path("reviews/all/", get_all_reviews),
 
-    path(
+    path("reviews/my/", get_my_reviews),
 
-        "reply/<int:id>/",
+    path("reviews/create/", create_review),
 
-        reply_support_message
+    path("reviews/update/<int:id>/", update_review),
 
-    ),
-
-    path(
-
-        "delete/<int:id>/",
-
-        delete_support_message
-
-    ),
-    path(
-
-    "analytics/",
-
-    dashboard_analytics
-
-),
+    path("reviews/delete/<int:id>/", delete_review),
 
 ]

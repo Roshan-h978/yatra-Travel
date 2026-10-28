@@ -1,15 +1,21 @@
-import API from "../api/api";
+import API, { getErrorMessage, isAdminUser, saveAuth } from "../api/api";
+
+import { Link, useNavigate } from "react-router-dom";
+
+import { GoogleLogin } from "@react-oauth/google";
 
 import { useState } from "react";
 
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 
-import { FcGoogle } from "react-icons/fc";
+import PasswordInput from "../components/PasswordInput/PasswordInput";
 
 import "./Register.css";
 
 function Register() {
+
+  const navigate = useNavigate();
 
   /* =========================
      STATES
@@ -62,10 +68,10 @@ function Register() {
 
     /* PASSWORD LENGTH */
 
-    if(password.length < 6){
+    if(password.length < 8){
 
       setError(
-        "Password must be at least 6 characters"
+        "Password must be at least 8 characters"
       );
 
       return;
@@ -76,7 +82,7 @@ function Register() {
 
       setLoading(true);
 
-      await API.post(
+      const response = await API.post(
         "/users/register/",
         {
 
@@ -89,14 +95,16 @@ function Register() {
         }
       );
 
+      // The backend logs the new user in straight away.
+      saveAuth(response.data);
+
       setShowPopup(true);
 
 
     }
 
     catch(err){
-      console.error(err);
-      setError("Registration failed. Please try again.");
+      setError(getErrorMessage(err, "Registration failed. Please try again."));
     }
 
     finally{
@@ -111,11 +119,28 @@ function Register() {
      GOOGLE REGISTER
   ========================= */
 
-  function handleGoogleRegister(){
+  async function handleGoogleRegister(credentialResponse){
 
-    alert(
-      "Google Authentication Integration Coming Soon"
-    );
+    setError("");
+
+    try{
+
+      const response = await API.post(
+        "/users/google-login/",
+        { token: credentialResponse.credential }
+      );
+
+      saveAuth(response.data);
+
+      navigate(isAdminUser(response.data.user) ? "/admin" : "/", { replace: true });
+
+    }
+
+    catch(err){
+
+      setError(getErrorMessage(err, "Google sign-up failed. Please try again."));
+
+    }
 
   }
 
@@ -186,7 +211,7 @@ function Register() {
 
             {error && (
 
-              <div className="error-box">
+              <div className="form-message error">
 
                 {error}
 
@@ -205,11 +230,12 @@ function Register() {
 
               <div className="form-group">
 
-                <label>
+                <label htmlFor="register-name">
                   Full Name
                 </label>
 
                 <input
+                  id="register-name"
                   type="text"
                   placeholder="Enter full name"
                   value={name}
@@ -225,11 +251,12 @@ function Register() {
 
               <div className="form-group">
 
-                <label>
+                <label htmlFor="register-email">
                   Email Address
                 </label>
 
                 <input
+                  id="register-email"
                   type="email"
                   placeholder="Enter email address"
                   value={email}
@@ -245,12 +272,13 @@ function Register() {
 
               <div className="form-group">
 
-                <label>
+                <label htmlFor="register-password">
                   Password
                 </label>
 
-                <input
-                  type="password"
+                <PasswordInput
+                  id="register-password"
+                  autoComplete="new-password"
                   placeholder="Create password"
                   value={password}
                   onChange={(e)=>
@@ -265,12 +293,13 @@ function Register() {
 
               <div className="form-group">
 
-                <label>
+                <label htmlFor="register-confirm">
                   Confirm Password
                 </label>
 
-                <input
-                  type="password"
+                <PasswordInput
+                  id="register-confirm"
+                  autoComplete="new-password"
                   placeholder="Confirm password"
                   value={confirmPassword}
                   onChange={(e)=>
@@ -316,18 +345,21 @@ function Register() {
 
             {/* GOOGLE BUTTON */}
 
-            <button
-              className="google-register-btn"
-              onClick={handleGoogleRegister}
-            >
+            <div className="google-login-wrapper">
 
-              <FcGoogle size={24} />
 
-              <span>
-                Continue with Google
-              </span>
+              <GoogleLogin
 
-            </button>
+                text="signup_with"
+
+                onSuccess={handleGoogleRegister}
+
+                onError={() => setError("Google sign-up failed. Please try again.")}
+
+              />
+
+
+            </div>
 
             {/* LOGIN LINK */}
 
@@ -337,11 +369,11 @@ function Register() {
                 Already have an account?
               </p>
 
-              <a href="/login">
+              <Link to="/login">
 
                 Login Here
 
-              </a>
+              </Link>
 
             </div>
 
@@ -374,8 +406,7 @@ function Register() {
 
                 setShowPopup(false);
 
-                window.location.href =
-                "/login";
+                navigate(isAdminUser() ? "/admin" : "/", { replace: true });
 
               }}
             >

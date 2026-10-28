@@ -1,64 +1,26 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 from rest_framework import serializers
 
-class RegisterSerializer(serializers.ModelSerializer):
 
-    role = serializers.CharField(
-        required=False
-    )
+class CustomerSerializer(serializers.ModelSerializer):
+
+    name = serializers.CharField(source="first_name", read_only=True)
+
+    booking_count = serializers.IntegerField(read_only=True)
 
     class Meta:
 
-        model = User
+        model = get_user_model()
 
         fields = [
-
-            "username",
+            "id",
+            "name",
             "email",
-            "password",
-            "role"
-
+            "username",
+            "is_active",
+            "is_staff",
+            "date_joined",
+            "last_login",
+            "booking_count",
         ]
-
-        extra_kwargs = {
-
-            "password":{
-
-                "write_only":True
-
-            }
-
-        }
-
-    def create(self,validated_data):
-
-        role = validated_data.pop(
-            "role",
-            "customer"
-        )
-
-        user = User.objects.create_user(
-
-            username=
-            validated_data["username"],
-
-            email=
-            validated_data["email"],
-
-            password=
-            validated_data["password"]
-
-        )
-
-        # ADMIN ROLE
-
-        if role == "admin":
-
-            user.is_staff = True
-
-            user.is_superuser = True
-
-        user.save()
-
-        return user

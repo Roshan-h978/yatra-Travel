@@ -14,3 +14,8 @@ class VehicleSerializer(serializers.ModelSerializer):
         model = Vehicle
 
         fields = "__all__"
+
+        extra_kwargs = {
+            "price_per_day": {"min_value": 0},
+            "seats": {"min_value": 1},
+        }

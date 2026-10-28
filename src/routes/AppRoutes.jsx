@@ -1,3 +1,5 @@
+import { lazy, Suspense } from "react";
+
 import {
 
   BrowserRouter,
@@ -32,7 +34,10 @@ import Services from "../pages/Services";
 
 import ProfileHome from "../pages/ProfileHome";
 
-import AdminDashboard from "../pages/AdminDashboard";
+import NotFound from "../pages/NotFound";
+
+// Loaded only when an admin opens /admin, so admin code and CSS stay out of the public pages.
+const AdminDashboard = lazy(() => import("../pages/AdminDashboard"));
 
 /* =========================
    ROUTE PROTECTION
@@ -56,61 +61,23 @@ function AppRoutes() {
 
       <Routes>
 
-        {/* =========================
-            HOME
-        ========================= */}
+        {/* PUBLIC: anyone can browse */}
 
-        <Route
+        <Route path="/" element={<Home />} />
 
-          path="/"
+        <Route path="/vehicles" element={<Vehicles />} />
 
-          element={<Home />}
+        <Route path="/packages" element={<Packages />} />
 
-        />
+        <Route path="/services" element={<Services />} />
 
-        {/* =========================
-            VEHICLES
-        ========================= */}
+        <Route path="/contact" element={<Contact />} />
 
-        <Route
+        <Route path="/login" element={<LoginPage />} />
 
-          path="/vehicles"
+        <Route path="/register" element={<Register />} />
 
-          element={
-
-            <ProtectedRoute>
-
-              <Vehicles />
-
-            </ProtectedRoute>
-
-          }
-
-        />
-
-        {/* =========================
-            PACKAGES
-        ========================= */}
-
-        <Route
-
-          path="/packages"
-
-          element={
-
-            <ProtectedRoute>
-
-              <Packages />
-
-            </ProtectedRoute>
-
-          }
-
-        />
-
-        {/* =========================
-            BOOKING
-        ========================= */}
+        {/* LOGGED-IN CUSTOMERS */}
 
         <Route
 
@@ -128,30 +95,6 @@ function AppRoutes() {
 
         />
 
-        {/* =========================
-            SERVICES
-        ========================= */}
-
-        <Route
-
-          path="/services"
-
-          element={
-
-            <ProtectedRoute>
-
-              <Services />
-
-            </ProtectedRoute>
-
-          }
-
-        />
-
-        {/* =========================
-            PROFILE
-        ========================= */}
-
         <Route
 
           path="/profile"
@@ -168,9 +111,7 @@ function AppRoutes() {
 
         />
 
-        {/* =========================
-            ADMIN
-        ========================= */}
+        {/* ADMIN */}
 
         <Route
 
@@ -178,55 +119,21 @@ function AppRoutes() {
 
           element={
 
-            <ProtectedRoute>
+            <AdminRoute>
 
-              <AdminRoute>
+              <Suspense fallback={<div className="state-message">Loading dashboard...</div>}>
 
                 <AdminDashboard />
 
-              </AdminRoute>
+              </Suspense>
 
-            </ProtectedRoute>
+            </AdminRoute>
 
           }
 
         />
 
-        {/* =========================
-            CONTACT
-        ========================= */}
-
-        <Route
-
-          path="/contact"
-
-          element={<Contact />}
-
-        />
-
-        {/* =========================
-            LOGIN
-        ========================= */}
-
-        <Route
-
-          path="/login"
-
-          element={<LoginPage />}
-
-        />
-
-        {/* =========================
-            REGISTER
-        ========================= */}
-
-        <Route
-
-          path="/register"
-
-          element={<Register />}
-
-        />
+        <Route path="*" element={<NotFound />} />
 
       </Routes>
 

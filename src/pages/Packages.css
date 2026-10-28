@@ -3,7 +3,7 @@
 
   min-height:100vh;
 
-  padding:140px 8%;
+  padding:var(--page-pad-top) var(--page-pad-x) var(--section-pad-y);
 
   background:#F8FAFC;
 }
@@ -29,7 +29,7 @@
 }
 
 .packages-header h1{
-  font-size:58px;
+  font-size:var(--fs-page-title);
 
   color:#0F172A;
 
@@ -54,11 +54,11 @@
 
 /* GRID */
 
-.package-grid{
+.packages-grid{
   display:grid;
 
   grid-template-columns:
-  repeat(auto-fit,minmax(360px,1fr));
+  repeat(auto-fit,minmax(min(100%,360px),1fr));
 
   gap:34px;
 }
@@ -112,7 +112,7 @@
 }
 
 .package-top h2{
-  font-size:30px;
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 
@@ -145,7 +145,7 @@
 /* PRICE */
 
 .package-bottom h3{
-  font-size:28px;
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 }
@@ -185,11 +185,35 @@
 @media(max-width:700px){
 
   .packages-header h1{
-    font-size:40px;
+    font-size:var(--fs-page-title);
   }
 
-  .package-grid{
+  .packages-grid{
     grid-template-columns:1fr;
   }
 
+}
+
+/* DETAILS CHIPS */
+
+.package-details{
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  margin-top:20px;
+}
+
+.package-details span{
+  padding:6px 14px;
+  border-radius:999px;
+  background:#F1F5F9;
+  color:#0F172A;
+  font-size:13px;
+  font-weight:500;
+}
+
+/* PLACEHOLDER WHEN NO IMAGE */
+
+.package-image{
+  background-color:#E2E8F0;
 }

@@ -10,3 +10,7 @@ class DriverSerializer(serializers.ModelSerializer):
         model = Driver
 
         fields = "__all__"
+
+        extra_kwargs = {
+            "experience_years": {"min_value": 0},
+        }

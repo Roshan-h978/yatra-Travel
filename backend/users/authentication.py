@@ -1,74 +1,49 @@
+from django.contrib.auth import get_user_model
 from django.contrib.auth.backends import ModelBackend
-
-from django.contrib.auth.models import User
+from django.db.models import Q
 
 
 class EmailOrUsernameModelBackend(ModelBackend):
 
     def authenticate(
-
         self,
-
         request,
-
         username=None,
-
         password=None,
-
         **kwargs
-
     ):
 
-        # =========================
-        # EMPTY CHECK
-        # =========================
-
-        if username is None:
+        if username is None or password is None:
 
             return None
 
-        user = None
+        User = get_user_model()
 
         # =========================
-        # FIND BY EMAIL
+        # FIND BY EMAIL OR USERNAME
         # =========================
 
-        try:
+        candidates = list(User.objects.filter(
+            Q(email__iexact=username) | Q(username__iexact=username)
+        ).order_by('id'))
 
-            user = User.objects.get(
+        if not candidates:
 
-                email=username
+            # Run the hasher anyway so response time doesn't reveal unknown accounts.
+            User().set_password(password)
 
-            )
-
-        except User.DoesNotExist:
-
-            pass
-
-        # =========================
-        # FIND BY USERNAME
-        # =========================
-
-        if not user:
-
-            try:
-
-                user = User.objects.get(
-
-                    username=username
-
-                )
-
-            except User.DoesNotExist:
-
-                return None
+            return None
 
         # =========================
         # PASSWORD CHECK
         # =========================
+        # One identifier can match two accounts (one by email, one by username):
+        # accept whichever one the password belongs to.
 
-        if user.check_password(password):
+        for user in candidates:
 
-            return user
+            if user.check_password(password) and self.user_can_authenticate(user):
+
+                return user
 
         return None

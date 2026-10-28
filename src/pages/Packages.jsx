@@ -1,6 +1,7 @@
 import { useEffect,useState }
-
 from "react";
+
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import API from "../api/api";
 
@@ -14,30 +15,37 @@ import "./Packages.css";
 
 function Packages() {
 
+  const navigate = useNavigate();
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const location = searchParams.get("location") || "";
+
   const [packages,setPackages] =
   useState([]);
 
   const [loading,setLoading] =
   useState(true);
 
+  const [error,setError] =
+  useState("");
+
   /* FETCH PACKAGES */
 
-  async function fetchPackages(){
-    try{
-      const response = await API.get("/packages/");
-      setPackages(response.data);
-    }
-    catch(error){
-      console.log(error);
-    }
-    finally{
-      setLoading(false);
-    }
-  }
-
   useEffect(()=>{
-    fetchPackages();
+
+    API.get("/packages/")
+      .then((response)=>setPackages(response.data))
+      .catch(()=>setError("Could not load packages. Please try again later."))
+      .finally(()=>setLoading(false));
+
   },[]);
+
+  const visiblePackages = location
+    ? packages.filter((item)=>
+        `${item.location} ${item.title}`.toLowerCase().includes(location.toLowerCase())
+      )
+    : packages;
 
   return (
 
@@ -68,18 +76,16 @@ function Packages() {
 
         </div>
 
-        {/* LOADING */}
+        {location && (
 
-        {loading && (
+          <div className="filter-chip-row">
 
-          <h2
-            style={{
-              textAlign:"center",
-              marginTop:"60px"
-            }}
-          >
-            Loading Packages...
-          </h2>
+            <span className="filter-chip">
+              Destination: {location}
+              <button type="button" aria-label="Clear filter" onClick={()=>setSearchParams({})}>×</button>
+            </span>
+
+          </div>
 
         )}
 
@@ -87,7 +93,15 @@ function Packages() {
 
         <div className="packages-grid">
 
-          {packages.map((item)=>(
+          {loading && <p className="state-message">Loading packages...</p>}
+
+          {error && <p className="state-message">{error}</p>}
+
+          {!loading && !error && visiblePackages.length === 0 && (
+            <p className="state-message">No packages found.</p>
+          )}
+
+          {visiblePackages.map((item)=>(
 
             <div
               className="package-card"
@@ -98,34 +112,31 @@ function Packages() {
 
               <div
                 className="package-image"
-                style={{
-
-                  backgroundImage:
-                  `url(${item.image})`
-
-                }}
+                style={
+                  item.image
+                    ? { backgroundImage:`url(${item.image})` }
+                    : undefined
+                }
               ></div>
 
               {/* CONTENT */}
 
               <div className="package-content">
 
-                <p className="package-location">
+                <div className="package-top">
 
-                  {item.location}
+                  <p>
+                    {item.location}
+                  </p>
 
-                </p>
+                  <h2>
+                    {item.title}
+                  </h2>
 
-                <h2>
-
-                  {item.name}
-
-                </h2>
+                </div>
 
                 <p className="package-description">
-
                   {item.description}
-
                 </p>
 
                 {/* DETAILS */}
@@ -133,33 +144,32 @@ function Packages() {
                 <div className="package-details">
 
                   <span>
-
                     {item.duration}
-
                   </span>
 
                   <span>
-
-                    {item.group_size}
-
+                    ★ {item.rating}
                   </span>
+
+                  {item.is_featured && (
+                    <span>Featured</span>
+                  )}
 
                 </div>
 
                 {/* PRICE */}
 
-                <div className="package-price">
+                <div className="package-bottom">
 
                   <h3>
-
-                    NPR {item.price}
-
+                    NPR {item.price.toLocaleString()}
                   </h3>
 
-                  <button>
-
-                    Explore
-
+                  <button
+                    type="button"
+                    onClick={()=>navigate(`/booking?package=${item.id}`)}
+                  >
+                    Book Package
                   </button>
 
                 </div>

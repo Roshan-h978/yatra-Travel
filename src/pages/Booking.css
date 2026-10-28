@@ -5,7 +5,7 @@
 
   min-height:100vh;
 
-  padding:150px 8%;
+  padding:var(--page-pad-top) var(--page-pad-x) var(--section-pad-y);
 
   background:
   linear-gradient(
@@ -38,7 +38,7 @@
 }
 
 .booking-header h1{
-  font-size:64px;
+  font-size:var(--fs-page-title);
 
   color:#0F172A;
 
@@ -94,7 +94,7 @@
 /* LEFT TITLE */
 
 .booking-left h2{
-  font-size:38px;
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 
@@ -115,7 +115,7 @@
 
 /* ROW */
 
-.form-row{
+.booking-page .form-row{
   display:grid;
 
   grid-template-columns:1fr 1fr;
@@ -125,7 +125,7 @@
 
 /* FORM GROUP */
 
-.form-group{
+.booking-page .form-group{
   display:flex;
 
   flex-direction:column;
@@ -135,7 +135,7 @@
 
 /* LABEL */
 
-.form-group label{
+.booking-page .form-group label{
   font-size:14px;
 
   font-weight:600;
@@ -147,9 +147,9 @@
 
 /* INPUTS */
 
-.form-group input,
-.form-group select,
-.form-group textarea{
+.booking-page .form-group input,
+.booking-page .form-group select,
+.booking-page .form-group textarea{
   width:100%;
 
   border:
@@ -175,7 +175,7 @@
 
 /* TEXTAREA */
 
-.form-group textarea{
+.booking-page .form-group textarea{
   min-height:150px;
 
   resize:none;
@@ -183,16 +183,16 @@
 
 /* PLACEHOLDER */
 
-.form-group input::placeholder,
-.form-group textarea::placeholder{
+.booking-page .form-group input::placeholder,
+.booking-page .form-group textarea::placeholder{
   color:#94A3B8;
 }
 
 /* FOCUS */
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus{
+.booking-page .form-group input:focus,
+.booking-page .form-group select:focus,
+.booking-page .form-group textarea:focus{
   background:white;
 
   border:
@@ -258,7 +258,7 @@
 
 /* INFO CARD */
 
-.booking-card{
+.booking-info-card{
   background:white;
 
   border-radius:36px;
@@ -274,8 +274,8 @@
 
 /* CARD TITLE */
 
-.booking-card h3{
-  font-size:32px;
+.booking-info-card h3{
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 
@@ -286,7 +286,7 @@
 
 /* LIST */
 
-.booking-card ul{
+.booking-info-card ul{
   display:flex;
 
   flex-direction:column;
@@ -298,7 +298,7 @@
 
 /* LIST ITEM */
 
-.booking-card ul li{
+.booking-info-card ul li{
   color:#475569;
 
   line-height:1.8;
@@ -314,7 +314,7 @@
 /* IMAGE */
 
 .booking-image{
-  height:340px;
+  height:clamp(200px, 24vw, 300px);
 
   border-radius:36px;
 
@@ -362,28 +362,50 @@
 @media(max-width:700px){
 
   .booking-page{
-    padding:130px 5%;
+    padding:var(--page-pad-top) var(--page-pad-x) var(--section-pad-y);
   }
 
   .booking-header h1{
-    font-size:42px;
+    font-size:var(--fs-page-title);
   }
 
   .booking-header span{
     font-size:16px;
   }
 
-  .form-row{
+  .booking-page .form-row{
     grid-template-columns:1fr;
   }
 
   .booking-left,
-  .booking-card{
+  .booking-info-card{
     padding:30px;
   }
 
   .booking-left h2{
-    font-size:30px;
+    font-size:clamp(20px, 2.2vw, 28px);
   }
 
+}
+
+/* PRICE ESTIMATE */
+
+.booking-estimate{
+  font-size:15px;
+  color:#475569;
+  margin-bottom:16px;
+}
+
+.booking-estimate strong{
+  color:#0F172A;
+}
+
+.booking-submit-btn:disabled{
+  opacity:0.6;
+  cursor:not-allowed;
+}
+
+.booking-submit-btn:disabled:hover{
+  transform:none;
+  box-shadow:none;
 }

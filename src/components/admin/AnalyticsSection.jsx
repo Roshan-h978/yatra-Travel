@@ -1,151 +1,113 @@
-import {
+import { FiCalendar, FiDollarSign, FiPercent, FiRefreshCw, FiUsers } from "react-icons/fi";
 
-  useEffect,
+import StatCard from "./StatCard";
 
-  useState
+import useAdminData from "./useAdminData";
 
-}
+const STATUS_ROWS = [
+  { key: "pending_bookings", label: "Pending", color: "#F59E0B" },
+  { key: "approved_bookings", label: "Approved", color: "#3B82F6" },
+  { key: "completed_bookings", label: "Completed", color: "#10B981" },
+  { key: "rejected_bookings", label: "Rejected", color: "#EF4444" },
+  { key: "cancelled_bookings", label: "Cancelled", color: "#94A3B8" },
+];
 
-from "react";
+function AnalyticsSection() {
 
-import API from "../../api/api";
+  const { data: stats, loading, error, reload } = useAdminData("/support/analytics/", null);
 
-import "./AnalyticsSection.css";
+  if (loading) return <p className="admin-loading-text">Loading analytics...</p>;
 
-function AnalyticsSection(){
+  if (error || !stats) {
 
-  const [analytics,setAnalytics] =
-  useState(null);
-
-  async function fetchAnalytics(){
-    try{
-      const response = await API.get("/support/analytics/");
-      setAnalytics(response.data);
-    }
-    catch(error){
-      console.log(error);
-    }
-  }
-
-  useEffect(()=>{
-    fetchAnalytics();
-  },[]);
-
-  if(!analytics){
-
-    return <p>Loading Analytics...</p>;
+    return (
+      <div className="admin-alert admin-alert--error">
+        {error || "Could not load analytics."}{" "}
+        <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" onClick={reload}>Retry</button>
+      </div>
+    );
 
   }
 
-  return(
+  const totalBookings = stats.total_bookings || 0;
 
-    <section className="dashboard-section">
+  const confirmed = stats.approved_bookings + stats.completed_bookings;
 
-      <div className="section-header">
+  const conversion = totalBookings ? Math.round((confirmed / totalBookings) * 100) : 0;
 
-        <h2>
+  const fleetUse = stats.total_vehicles
+    ? Math.round(((stats.total_vehicles - stats.available_vehicles) / stats.total_vehicles) * 100)
+    : 0;
 
-          Analytics Dashboard
+  return (
 
-        </h2>
+    <section className="admin-section">
+
+      <div className="admin-section-header">
+
+        <div>
+          <h2>Analytics</h2>
+          <p>Revenue counts approved and completed bookings only.</p>
+        </div>
+
+        <button type="button" className="admin-btn admin-btn--ghost" onClick={reload}><FiRefreshCw aria-hidden="true" /> Refresh</button>
 
       </div>
 
-      <div className="stats-grid">
+      <div className="admin-stats-grid">
 
-        <div className="stat-card">
+        <StatCard icon={FiDollarSign} tone="green" label="Total Revenue" value={`NPR ${stats.total_revenue.toLocaleString()}`} />
 
-          <h2>
+        <StatCard icon={FiCalendar} tone="blue" label="Total Bookings" value={totalBookings} />
 
-            {analytics.total_bookings}
+        <StatCard icon={FiUsers} tone="purple" label="Customers" value={stats.total_customers} />
 
-          </h2>
+        <StatCard icon={FiPercent} tone="amber" label="Confirmation Rate" value={`${conversion}%`} />
 
-          <p>Total Bookings</p>
+      </div>
 
-        </div>
+      <div className="admin-grid-2">
 
-        <div className="stat-card">
+        <div className="admin-card">
 
-          <h2>
+          <h3>Bookings by Status</h3>
 
-            {analytics.total_vehicles}
+          {STATUS_ROWS.map((row) => {
 
-          </h2>
+            const value = stats[row.key];
 
-          <p>Total Vehicles</p>
+            const pct = totalBookings ? (value / totalBookings) * 100 : 0;
 
-        </div>
+            return (
+              <div className="admin-bar-row" key={row.key}>
+                <span>{row.label}</span>
+                <div className="admin-bar-track">
+                  <div className="admin-bar-fill" style={{ width: `${pct}%`, background: row.color }} />
+                </div>
+                <strong>{value}</strong>
+              </div>
+            );
 
-        <div className="stat-card">
-
-          <h2>
-
-            {analytics.total_packages}
-
-          </h2>
-
-          <p>Total Packages</p>
-
-        </div>
-
-        <div className="stat-card">
-
-          <h2>
-
-            {analytics.total_customers}
-
-          </h2>
-
-          <p>Total Customers</p>
+          })}
 
         </div>
 
-        <div className="stat-card">
+        <div className="admin-card">
 
-          <h2>
+          <h3>Inventory</h3>
 
-            NPR {analytics.total_revenue}
+          <div className="admin-bar-row">
+            <span>Fleet in use</span>
+            <div className="admin-bar-track"><div className="admin-bar-fill" style={{ width: `${fleetUse}%` }} /></div>
+            <strong>{fleetUse}%</strong>
+          </div>
 
-          </h2>
-
-          <p>Total Revenue</p>
-
-        </div>
-
-        <div className="stat-card">
-
-          <h2>
-
-            {analytics.approved_bookings}
-
-          </h2>
-
-          <p>Approved Bookings</p>
-
-        </div>
-
-        <div className="stat-card">
-
-          <h2>
-
-            {analytics.pending_bookings}
-
-          </h2>
-
-          <p>Pending Bookings</p>
-
-        </div>
-
-        <div className="stat-card">
-
-          <h2>
-
-            {analytics.completed_bookings}
-
-          </h2>
-
-          <p>Completed Bookings</p>
+          <div className="admin-list">
+            <div className="admin-list-item"><h4>Vehicles</h4><span>{stats.total_vehicles} ({stats.available_vehicles} available)</span></div>
+            <div className="admin-list-item"><h4>Tour Packages</h4><span>{stats.total_packages}</span></div>
+            <div className="admin-list-item"><h4>Drivers</h4><span>{stats.total_drivers}</span></div>
+            <div className="admin-list-item"><h4>Open Support Messages</h4><span>{stats.pending_support}</span></div>
+          </div>
 
         </div>
 

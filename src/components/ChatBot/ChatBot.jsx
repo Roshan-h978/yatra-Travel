@@ -1,5 +1,9 @@
 import "./ChatBot.css";
 
+import { Link } from "react-router-dom";
+
+import { FaCommentDots, FaPaperPlane, FaTimes } from "react-icons/fa";
+
 import { useState } from "react";
 
 function ChatBot() {
@@ -27,7 +31,8 @@ function ChatBot() {
       },
       {
         sender: "bot",
-        text: "Thank you for your inquiry. Our team will contact you shortly."
+        text: "Thanks! This chat isn't monitored live. Please send your question through our Contact page and our team will reply by email.",
+        link: true
       }
     ];
 
@@ -44,10 +49,12 @@ function ChatBot() {
       {/* CHAT BUTTON */}
 
       <button
+        type="button"
         className="chat-toggle"
+        aria-label={open ? "Close chat" : "Open chat"}
         onClick={() => setOpen(!open)}
       >
-        Chat
+        {open ? <FaTimes /> : <FaCommentDots />}
       </button>
 
       {/* CHAT BOX */}
@@ -68,10 +75,12 @@ function ChatBot() {
 
               <div
                 key={index}
-                className={`message ${msg.sender}`}
+                className={`chat-message ${msg.sender}`}
               >
 
                 {msg.text}
+
+                {msg.link && <> <Link to="/contact">Open Contact page</Link></>}
 
               </div>
 
@@ -79,7 +88,10 @@ function ChatBot() {
 
           </div>
 
-          <div className="chat-input">
+          <form
+            className="chat-input"
+            onSubmit={(e) => { e.preventDefault(); sendMessage(); }}
+          >
 
             <input
               type="text"
@@ -88,11 +100,12 @@ function ChatBot() {
               onChange={(e)=>setInput(e.target.value)}
             />
 
-            <button onClick={sendMessage}>
-              Send
+            <button type="submit" aria-label="Send message">
+              <FaPaperPlane aria-hidden="true" />
+              <span className="chat-send-label">Send</span>
             </button>
 
-          </div>
+          </form>
 
         </div>
 

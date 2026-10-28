@@ -1,101 +1,19 @@
 .admin-dashboard-page{
-
   display:flex;
-
   min-height:100vh;
-
-  background:#F8FAFC;
-
+  background:#F1F5F9;
 }
 
 .admin-main{
-
   flex:1;
-
-  padding:28px;
-
-  overflow-x:hidden;
-
+  min-width:0;
+  display:flex;
+  flex-direction:column;
 }
 
 .admin-content{
-
   width:100%;
-
-}
-
-.admin-loading{
-
-  width:100%;
-
-  min-height:100vh;
-
-  background:#F8FAFC;
-
-  display:flex;
-
-  flex-direction:column;
-
-  justify-content:center;
-
-  align-items:center;
-
-  gap:24px;
-
-}
-
-.admin-loading h2{
-
-  color:#0F172A;
-
-  font-size:28px;
-
-}
-
-.admin-loader{
-
-  width:70px;
-
-  height:70px;
-
-  border-radius:50%;
-
-  border:6px solid #E2E8F0;
-
-  border-top:6px solid #EF4444;
-
-  animation:spin 1s linear infinite;
-
-}
-
-@keyframes spin{
-
-  0%{
-
-    transform:rotate(0deg);
-
-  }
-
-  100%{
-
-    transform:rotate(360deg);
-
-  }
-
-}
-
-@media(max-width:1000px){
-
-  .admin-dashboard-page{
-
-    flex-direction:column;
-
-  }
-
-  .admin-main{
-
-    padding:18px;
-
-  }
-
+  max-width:1400px;
+  margin:0 auto;
+  padding:clamp(16px, 2.5vw, 28px);
 }

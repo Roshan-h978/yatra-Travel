@@ -2,11 +2,15 @@ import { useState } from "react";
 
 import "./AdminDashboard.css";
 
+import "../components/admin/AdminCommon.css";
+
 /* ADMIN COMPONENTS */
 
 import Sidebar from "../components/admin/Sidebar";
 
 import Topbar from "../components/admin/Topbar";
+
+import ADMIN_MENU from "../components/admin/adminMenu";
 
 import DashboardOverview from "../components/admin/DashboardOverview";
 
@@ -28,86 +32,78 @@ import SupportSection from "../components/admin/SupportSection";
 
 function AdminDashboard() {
 
-  const [activeSection,setActiveSection] =
-  useState("dashboard");
+  const [activeSection, setActiveSection] = useState("dashboard");
 
-  function renderSection(){
+  // Drawer state for tablet / phone widths.
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
-    switch(activeSection){
+  function selectSection(id) {
 
-      case "dashboard":
+    setActiveSection(id);
 
-        return <DashboardOverview />;
+    setSidebarOpen(false);
+
+    window.scrollTo({ top: 0 });
+
+  }
+
+  function renderSection() {
+
+    switch (activeSection) {
 
       case "vehicles":
-
         return <VehicleManagement />;
 
       case "packages":
-
         return <PackageManagement />;
 
       case "bookings":
-
         return <BookingManagement />;
 
       case "drivers":
-
         return <DriverManagement />;
 
       case "customers":
-
         return <CustomerManagement />;
 
       case "reviews":
-
         return <ReviewManagement />;
 
       case "analytics":
-
         return <AnalyticsSection />;
 
       case "support":
-
         return <SupportSection />;
 
       default:
-
-        return <DashboardOverview />;
+        return <DashboardOverview onNavigate={selectSection} />;
 
     }
 
   }
 
+  const title = ADMIN_MENU.find((item) => item.id === activeSection)?.title || "Dashboard";
+
   return (
 
     <div className="admin-dashboard-page">
 
-      {/* SIDEBAR */}
-
       <Sidebar
-
         activeSection={activeSection}
-
-        setActiveSection={setActiveSection}
-
+        onSelect={selectSection}
+        open={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
-
-      {/* MAIN */}
 
       <div className="admin-main">
 
-        <Topbar />
+        <Topbar title={title} onMenuClick={() => setSidebarOpen(true)} />
 
-        <div className="admin-content">
+        <main className="admin-content">
 
-          {
+          {renderSection()}
 
-            renderSection()
-
-          }
-
-        </div>
+        </main>
 
       </div>
 

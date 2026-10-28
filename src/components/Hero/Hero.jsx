@@ -1,6 +1,37 @@
 import "./Hero.css";
 
+import { useState } from "react";
+
+import { useNavigate } from "react-router-dom";
+
+const DESTINATIONS = ["Kathmandu", "Pokhara", "Mustang", "Chitwan", "Everest"];
+
+const VEHICLE_TYPES = ["SUV", "Luxury", "Jeep", "Bike"];
+
 function Hero() {
+
+  const navigate = useNavigate();
+
+  const [destination, setDestination] = useState("");
+
+  const [vehicleType, setVehicleType] = useState("");
+
+  // A destination searches tour packages; otherwise search vehicles.
+  function handleSearch(e) {
+
+    e.preventDefault();
+
+    if (destination) {
+
+      navigate(`/packages?location=${encodeURIComponent(destination)}`);
+
+    } else {
+
+      navigate(vehicleType ? `/vehicles?type=${encodeURIComponent(vehicleType)}` : "/vehicles");
+
+    }
+
+  }
 
   return (
 
@@ -49,7 +80,7 @@ function Hero() {
 
         <div className="hero-buttons">
 
-          <button className="hero-btn">
+          <button className="hero-btn" onClick={() => navigate("/packages")}>
 
             Explore Packages
 
@@ -59,37 +90,27 @@ function Hero() {
 
       </div>
 
-      {/* BOOKING CARD */}
+      {/* SEARCH CARD */}
 
-      <div className="booking-card">
+      <form className="hero-search-card" onSubmit={handleSearch}>
 
         <div className="booking-field">
 
-          <label>
+          <label htmlFor="hero-destination">
 
             Destination
 
           </label>
 
-          <select>
+          <select
+            id="hero-destination"
+            value={destination}
+            onChange={(e) => { setDestination(e.target.value); setVehicleType(""); }}
+          >
 
-            <option>
+            <option value="">Any destination</option>
 
-              Pokhara
-
-            </option>
-
-            <option>
-
-              Kathmandu
-
-            </option>
-
-            <option>
-
-              Mustang
-
-            </option>
+            {DESTINATIONS.map((d) => <option key={d}>{d}</option>)}
 
           </select>
 
@@ -97,55 +118,33 @@ function Hero() {
 
         <div className="booking-field">
 
-          <label>
+          <label htmlFor="hero-vehicle-type">
 
-            Pickup Date
-
-          </label>
-
-          <input type="date" />
-
-        </div>
-
-        <div className="booking-field">
-
-          <label>
-
-            Vehicle
+            Vehicle Type
 
           </label>
 
-          <select>
+          <select
+            id="hero-vehicle-type"
+            value={vehicleType}
+            onChange={(e) => { setVehicleType(e.target.value); setDestination(""); }}
+          >
 
-            <option>
+            <option value="">Any vehicle</option>
 
-              Luxury SUV
-
-            </option>
-
-            <option>
-
-              Jeep
-
-            </option>
-
-            <option>
-
-              Bike
-
-            </option>
+            {VEHICLE_TYPES.map((t) => <option key={t}>{t}</option>)}
 
           </select>
 
         </div>
 
-        <button className="booking-btn">
+        <button type="submit" className="booking-btn">
 
           Search
 
         </button>
 
-      </div>
+      </form>
 
     </section>
 

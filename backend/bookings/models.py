@@ -1,10 +1,12 @@
 from django.db import models
 
-from django.contrib.auth.models import User
+from django.conf import settings
 
 from vehicles.models import Vehicle
 
 from packages_app.models import Package
+
+from drivers.models import Driver
 
 
 class Booking(models.Model):
@@ -19,11 +21,13 @@ class Booking(models.Model):
 
         ('Completed', 'Completed'),
 
+        ('Cancelled', 'Cancelled'),
+
     ]
 
     user = models.ForeignKey(
 
-        User,
+        settings.AUTH_USER_MODEL,
 
         on_delete=models.CASCADE
 
@@ -44,6 +48,18 @@ class Booking(models.Model):
     package = models.ForeignKey(
 
         Package,
+
+        on_delete=models.SET_NULL,
+
+        null=True,
+
+        blank=True
+
+    )
+
+    driver = models.ForeignKey(
+
+        Driver,
 
         on_delete=models.SET_NULL,
 

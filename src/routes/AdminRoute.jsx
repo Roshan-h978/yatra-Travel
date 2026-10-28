@@ -1,56 +1,23 @@
-import {
+import { Navigate, useLocation } from "react-router-dom";
 
-  Navigate
+import { isAdminUser, isLoggedIn } from "../api/api";
 
-}
-
-from "react-router-dom";
-
+// UI guard only. The backend enforces admin permissions on every admin endpoint.
 function AdminRoute({ children }) {
 
-  /* =========================
-     GET USER
-  ========================= */
+  const location = useLocation();
 
-  const storedUser =
-  localStorage.getItem("user");
+  if (!isLoggedIn()) {
 
-  /* =========================
-     NO USER
-  ========================= */
-
-  if(!storedUser){
-
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace state={{ from: location }} />;
 
   }
 
-  /* =========================
-     PARSE USER
-  ========================= */
+  if (!isAdminUser()) {
 
-  const user =
-  JSON.parse(storedUser);
-
-  /* =========================
-     ADMIN CHECK
-  ========================= */
-
-  if(
-
-    !user.is_admin &&
-
-    !user.is_superuser
-
-  ){
-
-    return <Navigate to="/" />;
+    return <Navigate to="/" replace />;
 
   }
-
-  /* =========================
-     ALLOW ACCESS
-  ========================= */
 
   return children;
 

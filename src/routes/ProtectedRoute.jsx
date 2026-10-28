@@ -1,23 +1,17 @@
-import { Navigate }
+import { Navigate, useLocation } from "react-router-dom";
 
-from "react-router-dom";
+import { isLoggedIn } from "../api/api";
 
 function ProtectedRoute({ children }) {
 
-  /* CHECK TOKEN */
+  const location = useLocation();
 
-  const token =
-  localStorage.getItem("access");
+  if (!isLoggedIn()) {
 
-  /* NO TOKEN */
-
-  if (!token) {
-
-    return <Navigate to="/login" />;
+    // Remember where the user was going so login can send them back.
+    return <Navigate to="/login" replace state={{ from: location }} />;
 
   }
-
-  /* ALLOW ACCESS */
 
   return children;
 

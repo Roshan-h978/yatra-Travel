@@ -3,20 +3,20 @@
 .services-section{
   width:100%;
 
-  padding:140px 8%;
+  padding:var(--section-pad-y) var(--page-pad-x);
 
   background:#F8FAFC;
 }
 
 /* HEADER */
 
-.services-header{
+.home-page .services-header{
   text-align:center;
 
   margin-bottom:80px;
 }
 
-.services-header p{
+.home-page .services-header p{
   color:#64748B;
 
   letter-spacing:4px;
@@ -30,8 +30,8 @@
   text-transform:uppercase;
 }
 
-.services-header h1{
-  font-size:60px;
+.home-page .services-header h1{
+  font-size:var(--fs-section-title);
 
   color:#0F172A;
 
@@ -40,7 +40,7 @@
   line-height:1.15;
 }
 
-.services-header span{
+.home-page .services-header span{
   display:block;
 
   margin-top:26px;
@@ -62,7 +62,7 @@
   display:grid;
 
   grid-template-columns:
-  repeat(auto-fit,minmax(300px,1fr));
+  repeat(auto-fit,minmax(min(100%,300px),1fr));
 
   gap:30px;
 }
@@ -124,7 +124,7 @@
 .service-card h2{
   margin-top:28px;
 
-  font-size:32px;
+  font-size:clamp(20px, 2.2vw, 28px);
 
   color:#0F172A;
 }
@@ -141,7 +141,10 @@
 
 /* BUTTON */
 
-.service-card button{
+.service-card .service-link-btn{
+  display:inline-block;
+  text-decoration:none;
+
   margin-top:30px;
 
   height:52px;
@@ -163,7 +166,7 @@
   transition:0.3s;
 }
 
-.service-card button:hover{
+.service-card .service-link-btn:hover{
   transform:
   translateY(-2px);
 }
@@ -173,7 +176,7 @@
 .experience-section{
   width:100%;
 
-  padding:120px 8%;
+  padding:var(--section-pad-y) var(--page-pad-x);
 
   background:white;
 
@@ -201,7 +204,7 @@
 }
 
 .experience-left h1{
-  font-size:62px;
+  font-size:var(--fs-section-title);
 
   color:#0F172A;
 
@@ -247,7 +250,7 @@
 .exp-card h2{
   color:#0F172A;
 
-  font-size:34px;
+  font-size:clamp(20px, 2.2vw, 28px);
 }
 
 .exp-card p{
@@ -259,7 +262,7 @@
 /* IMAGE */
 
 .experience-image{
-  height:620px;
+  height:clamp(260px, 36vw, 460px);
 
   border-radius:40px;
 
@@ -278,7 +281,7 @@
 .destination-section{
   width:100%;
 
-  padding:120px 8%;
+  padding:var(--section-pad-y) var(--page-pad-x);
 
   background:#F8FAFC;
 }
@@ -289,7 +292,7 @@
   display:grid;
 
   grid-template-columns:
-  repeat(auto-fit,minmax(320px,1fr));
+  repeat(auto-fit,minmax(min(100%,320px),1fr));
 
   gap:30px;
 }
@@ -297,7 +300,7 @@
 /* CARD */
 
 .destination-card{
-  height:420px;
+  height:clamp(240px, 26vw, 340px);
 
   border-radius:36px;
 
@@ -347,7 +350,7 @@
 .destination-overlay h2{
   color:white;
 
-  font-size:36px;
+  font-size:clamp(20px, 2.2vw, 28px);
 }
 
 /* RESPONSIVE */
@@ -362,14 +365,22 @@
 
 @media(max-width:700px){
 
-  .services-header h1,
+  .home-page .services-header h1,
   .experience-left h1{
-    font-size:42px;
+    font-size:var(--fs-section-title);
   }
 
   .experience-image{
-    height:420px;
+    height:clamp(260px, 36vw, 460px);
   }
 
 }
 
+
+
+/* DESTINATION CARDS ARE LINKS */
+
+.destination-card{
+  display:block;
+  text-decoration:none;
+}

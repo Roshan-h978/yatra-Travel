@@ -12,16 +12,136 @@ html{
   scroll-behavior:smooth;
 }
 
+html,
+body{
+  width:100%;
+  overflow-x:hidden;
+}
+
 body{
   background:var(--bg);
 
   color:var(--text);
 
   font-family:'Poppins',sans-serif;
-
-  overflow-x:hidden;
 }
 
-button{
-  font-family:'Poppins',sans-serif;
+button,
+input,
+select,
+textarea{
+  font-family:inherit;
+}
+
+img{
+  max-width:100%;
+}
+
+/* =========================
+   SHARED FEEDBACK MESSAGES
+========================= */
+
+.form-message{
+  padding:12px 16px;
+  border-radius:10px;
+  font-size:14px;
+  margin-bottom:18px;
+}
+
+.form-message.success{
+  background:#ECFDF5;
+  color:#047857;
+  border:1px solid #A7F3D0;
+}
+
+.form-message.error{
+  background:#FEF2F2;
+  color:#B91C1C;
+  border:1px solid #FECACA;
+}
+
+.state-message{
+  grid-column:1 / -1;
+  text-align:center;
+  padding:40px 20px;
+  color:var(--muted);
+}
+
+/* =========================
+   FILTER TABS / CHIPS (vehicles + packages)
+========================= */
+
+.filter-chip-row{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px;
+  margin:0 0 40px;
+}
+
+.filter-tab,
+.filter-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 20px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:var(--surface);
+  color:var(--text);
+  font-size:14px;
+  font-weight:500;
+}
+
+.filter-tab{
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.filter-tab.active,
+.filter-tab:hover{
+  background:var(--dark);
+  border-color:var(--dark);
+  color:white;
+}
+
+.filter-chip button{
+  border:none;
+  background:none;
+  font-size:18px;
+  line-height:1;
+  cursor:pointer;
+  color:var(--muted);
+}
+
+/* Centres the Google sign-in button (login + register) */
+
+.google-login-wrapper{
+  display:flex;
+  justify-content:center;
+}
+
+/* =========================
+   404 PAGE
+========================= */
+
+.not-found{
+  min-height:70vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:16px;
+  padding:calc(var(--nav-height) + 40px) var(--page-x) 60px;
+  text-align:center;
+}
+
+.not-found h1{
+  font-size:72px;
+  color:var(--primary);
+}
+
+.not-found a{
+  color:var(--accent);
+  font-weight:600;
 }

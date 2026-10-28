@@ -28,3 +28,15 @@ backend/db.sqlite3
 *.njsproj
 *.sln
 *.sw?
+
+# Local environment files
+.env
+backend/.env
+
+# Python bytecode / caches
+__pycache__/
+*.py[cod]
+
+# Test / coverage output
+.coverage
+htmlcov/

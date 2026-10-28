@@ -1,6 +1,8 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import API from "../api/api";
+import { Link, useSearchParams } from "react-router-dom";
+
+import API, { getErrorMessage, getStoredUser } from "../api/api";
 
 import Navbar from "../components/Navbar/Navbar";
 
@@ -8,24 +10,47 @@ import Footer from "../components/Footer/Footer";
 
 import "./Booking.css";
 
+// Local date as YYYY-MM-DD (toISOString alone would give the UTC date).
+function localToday() {
+
+  const d = new Date();
+
+  return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+}
+
+function dayCount(pickup, ret) {
+
+  if (!pickup || !ret || ret < pickup) return 0;
+
+  return Math.round((new Date(ret) - new Date(pickup)) / 86400000) + 1;
+
+}
+
 function Booking() {
+
+  const [searchParams] = useSearchParams();
+
+  const storedUser = getStoredUser();
+
+  const today = localToday();
 
   /* STATES */
 
   const [fullName,setFullName] =
-  useState("");
+  useState(storedUser?.name || "");
 
   const [email,setEmail] =
-  useState("");
+  useState(storedUser?.email || "");
 
   const [phone,setPhone] =
   useState("");
 
-  const [destination,setDestination] =
-  useState("");
+  const [vehicleId,setVehicleId] =
+  useState(searchParams.get("vehicle") || "");
 
-  const [vehicle,setVehicle] =
-  useState("");
+  const [packageId,setPackageId] =
+  useState(searchParams.get("package") || "");
 
   const [pickupDate,setPickupDate] =
   useState("");
@@ -36,8 +61,45 @@ function Booking() {
   const [notes,setNotes] =
   useState("");
 
+  const [vehicles,setVehicles] =
+  useState([]);
+
+  const [packages,setPackages] =
+  useState([]);
+
   const [loading,setLoading] =
   useState(false);
+
+  const [message,setMessage] =
+  useState(null);
+
+  /* LOAD OPTIONS */
+
+  useEffect(()=>{
+
+    API.get("/vehicles/")
+      .then((res)=>setVehicles(res.data))
+      .catch(()=>setVehicles([]));
+
+    API.get("/packages/")
+      .then((res)=>setPackages(res.data))
+      .catch(()=>setPackages([]));
+
+  },[]);
+
+  /* PRICE ESTIMATE (the server calculates the final price) */
+
+  const estimate = useMemo(()=>{
+
+    const days = dayCount(pickupDate, returnDate);
+
+    const vehicle = vehicles.find((v)=>String(v.id) === String(vehicleId));
+
+    const pkg = packages.find((p)=>String(p.id) === String(packageId));
+
+    return (vehicle ? vehicle.price_per_day * days : 0) + (pkg ? pkg.price : 0);
+
+  },[vehicles, packages, vehicleId, packageId, pickupDate, returnDate]);
 
   /* BOOKING */
 
@@ -45,44 +107,61 @@ function Booking() {
 
     e.preventDefault();
 
+    setMessage(null);
+
+    if(!vehicleId && !packageId){
+
+      setMessage({ type:"error", text:"Please choose a vehicle or a tour package." });
+
+      return;
+
+    }
+
+    if(returnDate < pickupDate){
+
+      setMessage({ type:"error", text:"Return date must be on or after the pickup date." });
+
+      return;
+
+    }
+
     setLoading(true);
 
     try{
 
-      await API.post(
-        "/bookings/add/",
+      const res = await API.post(
+        "/bookings/create/",
         {
 
-          customer_name:fullName,
+          full_name:fullName,
 
           email:email,
 
           phone:phone,
 
-          destination:destination,
+          vehicle:vehicleId || null,
 
-          vehicle_name:vehicle,
+          package:packageId || null,
 
           pickup_date:pickupDate,
 
           return_date:returnDate,
 
-          additional_notes:notes
+          special_request:notes
 
         }
       );
 
-      alert(
-        "Booking Created Successfully"
-      );
+      setMessage({
+        type:"success",
+        text:`Booking request sent! Total NPR ${res.data.booking.total_price.toLocaleString()}. We'll email you once it's confirmed.`
+      });
 
       /* RESET */
 
-      setFullName("");
-      setEmail("");
       setPhone("");
-      setDestination("");
-      setVehicle("");
+      setVehicleId("");
+      setPackageId("");
       setPickupDate("");
       setReturnDate("");
       setNotes("");
@@ -91,11 +170,7 @@ function Booking() {
 
     catch(error){
 
-      alert(
-        "Booking Failed"
-      );
-
-      console.log(error);
+      setMessage({ type:"error", text:getErrorMessage(error, "Booking failed. Please try again.") });
 
     }
 
@@ -147,6 +222,20 @@ function Booking() {
               Booking Information
             </h2>
 
+            {message && (
+
+              <div className={`form-message ${message.type}`} role="status">
+
+                {message.text}
+
+                {message.type === "success" && (
+                  <> <Link to="/profile">View my bookings</Link></>
+                )}
+
+              </div>
+
+            )}
+
             {/* FORM */}
 
             <form
@@ -158,11 +247,12 @@ function Booking() {
 
               <div className="form-group">
 
-                <label>
+                <label htmlFor="booking-name">
                   Full Name
                 </label>
 
                 <input
+                  id="booking-name"
                   type="text"
                   placeholder="Enter full name"
                   value={fullName}
@@ -174,105 +264,23 @@ function Booking() {
 
               </div>
 
-              {/* EMAIL */}
-
-              <div className="form-group">
-
-                <label>
-                  Email Address
-                </label>
-
-                <input
-                  type="email"
-                  placeholder="Enter email"
-                  value={email}
-                  onChange={(e)=>
-                    setEmail(e.target.value)
-                  }
-                  required
-                />
-
-              </div>
-
-              {/* PHONE */}
-
-              <div className="form-group">
-
-                <label>
-                  Phone Number
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Enter phone number"
-                  value={phone}
-                  onChange={(e)=>
-                    setPhone(e.target.value)
-                  }
-                  required
-                />
-
-              </div>
-
-              {/* DESTINATION */}
-
-              <div className="form-group">
-
-                <label>
-                  Destination
-                </label>
-
-                <select
-                  value={destination}
-                  onChange={(e)=>
-                    setDestination(e.target.value)
-                  }
-                  required
-                >
-
-                  <option value="">
-                    Select Destination
-                  </option>
-
-                  <option>
-                    Kathmandu
-                  </option>
-
-                  <option>
-                    Pokhara
-                  </option>
-
-                  <option>
-                    Mustang
-                  </option>
-
-                  <option>
-                    Chitwan
-                  </option>
-
-                  <option>
-                    Everest Region
-                  </option>
-
-                </select>
-
-              </div>
-
-              {/* DATES */}
+              {/* EMAIL + PHONE */}
 
               <div className="form-row">
 
                 <div className="form-group">
 
-                  <label>
-                    Pickup Date
+                  <label htmlFor="booking-email">
+                    Email Address
                   </label>
 
                   <input
-                    type="date"
-                    value={pickupDate}
+                    id="booking-email"
+                    type="email"
+                    placeholder="Enter email"
+                    value={email}
                     onChange={(e)=>
-                      setPickupDate(e.target.value)
+                      setEmail(e.target.value)
                     }
                     required
                   />
@@ -281,15 +289,18 @@ function Booking() {
 
                 <div className="form-group">
 
-                  <label>
-                    Return Date
+                  <label htmlFor="booking-phone">
+                    Phone Number
                   </label>
 
                   <input
-                    type="date"
-                    value={returnDate}
+                    id="booking-phone"
+                    type="tel"
+                    maxLength={30}
+                    placeholder="Enter phone number"
+                    value={phone}
                     onChange={(e)=>
-                      setReturnDate(e.target.value)
+                      setPhone(e.target.value)
                     }
                     required
                   />
@@ -302,43 +313,112 @@ function Booking() {
 
               <div className="form-group">
 
-                <label>
+                <label htmlFor="booking-vehicle">
                   Vehicle
                 </label>
 
                 <select
-                  value={vehicle}
+                  id="booking-vehicle"
+                  value={vehicleId}
                   onChange={(e)=>
-                    setVehicle(e.target.value)
+                    setVehicleId(e.target.value)
                   }
-                  required
                 >
 
                   <option value="">
-                    Select Vehicle
+                    No vehicle
                   </option>
 
-                  <option>
-                    Toyota Prado
-                  </option>
+                  {vehicles.map((v)=>(
 
-                  <option>
-                    Ford Everest
-                  </option>
+                    <option
+                      key={v.id}
+                      value={v.id}
+                      disabled={v.status === "Maintenance"}
+                    >
+                      {v.brand} {v.name}: NPR {v.price_per_day.toLocaleString()}/day
+                      {v.status === "Maintenance" ? " (unavailable)" : ""}
+                    </option>
 
-                  <option>
-                    Scorpio N
-                  </option>
-
-                  <option>
-                    Suzuki Jimny
-                  </option>
-
-                  <option>
-                    Land Cruiser
-                  </option>
+                  ))}
 
                 </select>
+
+              </div>
+
+              {/* PACKAGE */}
+
+              <div className="form-group">
+
+                <label htmlFor="booking-package">
+                  Tour Package
+                </label>
+
+                <select
+                  id="booking-package"
+                  value={packageId}
+                  onChange={(e)=>
+                    setPackageId(e.target.value)
+                  }
+                >
+
+                  <option value="">
+                    No package
+                  </option>
+
+                  {packages.map((p)=>(
+
+                    <option key={p.id} value={p.id}>
+                      {p.title} ({p.duration}): NPR {p.price.toLocaleString()}
+                    </option>
+
+                  ))}
+
+                </select>
+
+              </div>
+
+              {/* DATES */}
+
+              <div className="form-row">
+
+                <div className="form-group">
+
+                  <label htmlFor="booking-pickup">
+                    Pickup Date
+                  </label>
+
+                  <input
+                    id="booking-pickup"
+                    type="date"
+                    min={today}
+                    value={pickupDate}
+                    onChange={(e)=>
+                      setPickupDate(e.target.value)
+                    }
+                    required
+                  />
+
+                </div>
+
+                <div className="form-group">
+
+                  <label htmlFor="booking-return">
+                    Return Date
+                  </label>
+
+                  <input
+                    id="booking-return"
+                    type="date"
+                    min={pickupDate || today}
+                    value={returnDate}
+                    onChange={(e)=>
+                      setReturnDate(e.target.value)
+                    }
+                    required
+                  />
+
+                </div>
 
               </div>
 
@@ -346,11 +426,12 @@ function Booking() {
 
               <div className="form-group">
 
-                <label>
-                  Additional Notes
+                <label htmlFor="booking-notes">
+                  Special Requests
                 </label>
 
                 <textarea
+                  id="booking-notes"
                   placeholder="Write additional requests..."
                   value={notes}
                   onChange={(e)=>
@@ -360,11 +441,20 @@ function Booking() {
 
               </div>
 
+              {estimate > 0 && (
+
+                <p className="booking-estimate">
+                  Estimated total: <strong>NPR {estimate.toLocaleString()}</strong>
+                </p>
+
+              )}
+
               {/* BUTTON */}
 
               <button
                 type="submit"
                 className="booking-submit-btn"
+                disabled={loading}
               >
 
                 {loading
@@ -384,7 +474,7 @@ function Booking() {
 
           <div className="booking-right">
 
-            <div className="booking-card">
+            <div className="booking-info-card">
 
               <h3>
                 Why Book With Yatra?

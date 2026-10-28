@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 import Navbar from "../components/Navbar/Navbar";
 import Hero from "../components/Hero/Hero";
 import Footer from "../components/Footer/Footer";
@@ -9,24 +11,27 @@ function Home() {
   const services = [
     {
       title: "Car Rentals",
+      link: "/vehicles",
       description:
         "Luxury SUVs, premium jeeps, and comfortable vehicles for every journey.",
     },
 
     {
       title: "Tour Packages",
+      link: "/packages",
       description:
         "Curated Nepal travel experiences with premium accommodations.",
     },
 
     {
       title: "Luxury Vehicles",
+      link: "/vehicles?type=Luxury",
       description: "Travel in style with our modern luxury vehicle collection.",
     },
   ];
 
   return (
-    <>
+    <div className="home-page">
       <Navbar />
 
       <Hero />
@@ -58,7 +63,9 @@ function Home() {
 
               <p>{service.description}</p>
 
-              <button>Explore Service</button>
+              <Link to={service.link} className="service-link-btn">
+                Explore Service
+              </Link>
             </div>
           ))}
         </div>
@@ -115,23 +122,23 @@ function Home() {
         </div>
 
         <div className="destination-grid">
-          <div className="destination-card">
+          <Link to="/packages?location=Pokhara" className="destination-card">
             <div className="destination-overlay">
               <h2>Pokhara</h2>
             </div>
-          </div>
+          </Link>
 
-          <div className="destination-card second">
+          <Link to="/packages?location=Mustang" className="destination-card second">
             <div className="destination-overlay">
               <h2>Mustang</h2>
             </div>
-          </div>
+          </Link>
 
-          <div className="destination-card third">
+          <Link to="/packages?location=Everest" className="destination-card third">
             <div className="destination-overlay">
               <h2>Everest</h2>
             </div>
-          </div>
+          </Link>
         </div>
       </section>
 
@@ -139,7 +146,7 @@ function Home() {
       {/* REAL CHATBOT */}
 
       <ChatBot />
-    </>
+    </div>
   );
 }
 

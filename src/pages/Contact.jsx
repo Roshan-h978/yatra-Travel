@@ -1,9 +1,64 @@
+import { useState } from "react";
+
+import API, { getErrorMessage } from "../api/api";
+
 import Navbar from "../components/Navbar/Navbar";
 import Footer from "../components/Footer/Footer";
 
 import "./Contact.css";
 
+const EMPTY_FORM = { name: "", email: "", phone: "", subject: "", message: "" };
+
 function Contact() {
+
+  const [form, setForm] = useState(EMPTY_FORM);
+
+  const [sending, setSending] = useState(false);
+
+  const [status, setStatus] = useState(null);
+
+  function handleChange(e) {
+
+    setForm({ ...form, [e.target.name]: e.target.value });
+
+  }
+
+  async function handleSubmit(e) {
+
+    e.preventDefault();
+
+    setSending(true);
+
+    setStatus(null);
+
+    try {
+
+      await API.post("/support/create/", {
+        customer_name: form.name,
+        email: form.email,
+        subject: form.subject,
+        // The support model has no phone field, so include it in the message.
+        message: form.phone ? `${form.message}
+
+Phone: ${form.phone}` : form.message,
+      });
+
+      setStatus({ type: "success", text: "Thanks! Your message has been sent. We'll reply by email." });
+
+      setForm(EMPTY_FORM);
+
+    } catch (err) {
+
+      setStatus({ type: "error", text: getErrorMessage(err, "Could not send your message. Please try again.") });
+
+    } finally {
+
+      setSending(false);
+
+    }
+
+  }
+
 
   return (
 
@@ -42,67 +97,81 @@ function Contact() {
               Send Us A Message
             </h2>
 
-            <form className="contact-form">
+            <form className="contact-form" onSubmit={handleSubmit}>
+
+              {status && (
+                <div className={`form-message ${status.type}`} role="status">{status.text}</div>
+              )}
 
               <div className="form-group">
-
-                <label>Full Name</label>
-
+                <label htmlFor="contact-name">Full Name</label>
                 <input
+                  id="contact-name"
+                  name="name"
                   type="text"
                   placeholder="Enter your full name"
+                  value={form.name}
+                  onChange={handleChange}
+                  required
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label>Email Address</label>
-
+                <label htmlFor="contact-email">Email Address</label>
                 <input
+                  id="contact-email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label>Phone Number</label>
-
+                <label htmlFor="contact-phone">Phone Number (optional)</label>
                 <input
-                  type="text"
+                  id="contact-phone"
+                  name="phone"
+                  type="tel"
                   placeholder="Enter your phone number"
+                  value={form.phone}
+                  onChange={handleChange}
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label>Subject</label>
-
+                <label htmlFor="contact-subject">Subject</label>
                 <input
+                  id="contact-subject"
+                  name="subject"
                   type="text"
                   placeholder="Enter subject"
+                  value={form.subject}
+                  onChange={handleChange}
+                  required
                 />
-
               </div>
 
               <div className="form-group">
-
-                <label>Message</label>
-
+                <label htmlFor="contact-message">Message</label>
                 <textarea
+                  id="contact-message"
+                  name="message"
                   placeholder="Write your message..."
+                  value={form.message}
+                  onChange={handleChange}
+                  required
                 ></textarea>
-
               </div>
 
               <button
                 type="submit"
                 className="contact-submit-btn"
+                disabled={sending}
               >
-                Send Message
+                {sending ? "Sending..." : "Send Message"}
               </button>
 
             </form>

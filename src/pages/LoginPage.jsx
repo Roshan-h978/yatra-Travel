@@ -1,8 +1,8 @@
-import API from "../api/api";
+import API, { getErrorMessage, isAdminUser, saveAuth } from "../api/api";
 
 import { useState } from "react";
 
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, useLocation, useSearchParams, Link } from "react-router-dom";
 
 import { GoogleLogin } from "@react-oauth/google";
 
@@ -10,10 +10,16 @@ import Navbar from "../components/Navbar/Navbar";
 
 import Footer from "../components/Footer/Footer";
 
+import PasswordInput from "../components/PasswordInput/PasswordInput";
+
 import "./LoginPage.css";
 
 function LoginPage() {
   const navigate = useNavigate();
+
+  const location = useLocation();
+
+  const [searchParams] = useSearchParams();
 
   /* =========================
      STATES
@@ -25,6 +31,36 @@ function LoginPage() {
 
   const [loading, setLoading] = useState(false);
 
+  const [error, setError] = useState("");
+
+  /* =========================
+     AFTER LOGIN
+  ========================= */
+
+  function finishLogin(data) {
+    saveAuth(data);
+
+    // Admins go to the dashboard. Customers return to the page they were trying to open
+    // (including its ?query, e.g. /booking?vehicle=3), otherwise to the home page.
+    const from = location.state?.from;
+
+    const fromPath = from
+      ? `${from.pathname}${from.search || ""}${from.hash || ""}`
+      : searchParams.get("next");
+
+    if (isAdminUser(data.user)) {
+      navigate("/admin", { replace: true });
+    } else {
+      navigate(
+        // Same-site paths only: one leading "/" (not "//" or "/\", which browsers treat as another site).
+        fromPath && /^\/(?![/\\])/.test(fromPath) && !fromPath.startsWith("/login")
+          ? fromPath
+          : "/",
+        { replace: true }
+      );
+    }
+  }
+
   /* =========================
      NORMAL LOGIN
   ========================= */
@@ -34,49 +70,14 @@ function LoginPage() {
 
     setLoading(true);
 
+    setError("");
+
     try {
-      const response = await API.post(
-        "/users/login/",
+      const response = await API.post("/users/login/", { login, password });
 
-        {
-          login: login,
-
-          password: password,
-        },
-      );
-
-      /* =========================
-       STORE TOKENS
-    ========================= */
-
-      localStorage.setItem("access", response.data.access);
-
-      localStorage.setItem("refresh", response.data.refresh);
-
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-
-      localStorage.setItem("yatraUser", "true");
-
-      /* =========================
-       ADMIN REDIRECT
-    ========================= */
-
-      if (response.data.user.is_admin || response.data.user.is_superuser) {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
-
-      window.location.reload();
-    } catch (error) {
-      console.log(error);
-
-      const errorData = error.response?.data;
-      alert(
-        errorData?.error ||
-        errorData?.detail ||
-        "Invalid Login"
-      );
+      finishLogin(response.data);
+    } catch (err) {
+      setError(getErrorMessage(err, "Invalid login. Please check your details."));
     } finally {
       setLoading(false);
     }
@@ -87,68 +88,16 @@ function LoginPage() {
   ========================= */
 
   async function handleGoogleSuccess(credentialResponse) {
+    setError("");
+
     try {
-      const response = await API.post(
-        "/users/google-login/",
+      const response = await API.post("/users/google-login/", {
+        token: credentialResponse.credential,
+      });
 
-        {
-          token: credentialResponse.credential,
-        },
-      );
-
-      console.log(
-        "GOOGLE LOGIN:",
-
-        response.data,
-      );
-
-      /* SAVE TOKENS */
-
-      localStorage.setItem(
-        "access",
-
-        response.data.access,
-      );
-
-      localStorage.setItem(
-        "refresh",
-
-        response.data.refresh,
-      );
-
-      /* SAVE USER */
-
-      localStorage.setItem(
-        "user",
-
-        JSON.stringify(response.data.user),
-      );
-
-      localStorage.setItem(
-        "yatraUser",
-
-        "loggedin",
-      );
-
-      /* ADMIN CHECK */
-
-      if (response.data.user.is_admin === true) {
-        navigate("/admin");
-      } else {
-        navigate("/profile");
-      }
-
-      /* REFRESH */
-
-      window.location.reload();
-    } catch (error) {
-      console.log(
-        "GOOGLE LOGIN ERROR:",
-
-        error.response?.data,
-      );
-
-      alert("Google Login Failed");
+      finishLogin(response.data);
+    } catch (err) {
+      setError(getErrorMessage(err, "Google login failed. Please try again."));
     }
   }
 
@@ -186,6 +135,8 @@ function LoginPage() {
               <p>Continue your luxury journey</p>
             </div>
 
+            {error && <div className="form-message error" role="alert">{error}</div>}
+
             {/* LOGIN FORM */}
 
             <form className="login-form" onSubmit={handleLogin}>
@@ -211,10 +162,9 @@ function LoginPage() {
               <div className="form-group">
                 <label htmlFor="password">Password</label>
 
-                <input
+                <PasswordInput
                   id="password"
                   name="password"
-                  type="password"
                   placeholder="Enter password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -249,9 +199,7 @@ function LoginPage() {
             <div className="google-login-wrapper">
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
-                onError={() => {
-                  alert("Google Login Failed");
-                }}
+                onError={() => setError("Google login failed. Please try again.")}
               />
             </div>
 

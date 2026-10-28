@@ -1,276 +1,42 @@
-import { useEffect, useState } from "react";
+import CrudSection from "./CrudSection";
 
-import API from "../../api/api";
+const FIELDS = [
+  { name: "title", label: "Package Title", required: true },
+  { name: "location", label: "Location", required: true },
+  { name: "duration", label: "Duration (e.g. 3 Days)", required: true },
+  { name: "price", label: "Price (NPR)", type: "number", min: 0, required: true },
+  { name: "rating", label: "Rating (0-5)", type: "number", step: "0.1", min: 0, max: 5, default: 5 },
+  { name: "image", label: "Image", type: "file" },
+  { name: "is_featured", label: "Featured package", type: "checkbox" },
+  { name: "description", label: "Description", type: "textarea", required: true },
+];
 
-import "./PackageManagement.css";
+const COLUMNS = [
+  {
+    label: "Image",
+    render: (p) => p.image ? <img className="admin-thumb" src={p.image} alt={p.title} /> : <span className="admin-thumb" />,
+  },
+  {
+    label: "Package",
+    render: (p) => <><strong>{p.title}</strong><span className="admin-muted">{p.location}</span></>,
+  },
+  { label: "Duration", render: (p) => p.duration },
+  { label: "Price", render: (p) => `NPR ${p.price.toLocaleString()}` },
+  { label: "Rating", render: (p) => `★ ${p.rating}` },
+  { label: "Featured", render: (p) => (p.is_featured ? "Yes" : "No") },
+];
 
 function PackageManagement() {
 
-  const [packages, setPackages] = useState([]);
-
-  const [showForm, setShowForm] = useState(false);
-
-  const [formData, setFormData] = useState({
-
-    title: "",
-
-    location: "",
-
-    duration: "",
-
-    price: "",
-
-    description: "",
-
-    image: null,
-
-  });
-
-  useEffect(() => {
-
-    fetchPackages();
-
-  }, []);
-
-  async function fetchPackages() {
-
-    try {
-
-      const response = await API.get(
-
-        "/packages/"
-
-      );
-
-      setPackages(response.data);
-
-    }
-
-    catch (error) {
-
-      console.log(error);
-
-    }
-
-  }
-
-  function handleChange(e) {
-
-    setFormData({
-
-      ...formData,
-
-      [e.target.name]: e.target.value,
-
-    });
-
-  }
-
-  function handleImage(e) {
-
-    setFormData({
-
-      ...formData,
-
-      image: e.target.files[0],
-
-    });
-
-  }
-
-  async function handleAddPackage(e) {
-
-    e.preventDefault();
-
-    try {
-
-      const data = new FormData();
-
-      Object.keys(formData).forEach((key) => {
-
-        data.append(key, formData[key]);
-
-      });
-
-      await API.post(
-
-        "/packages/add/",
-
-        data,
-
-        {
-
-          headers: {
-
-            "Content-Type":
-            "multipart/form-data",
-
-          },
-
-        }
-
-      );
-
-      alert("Package Added Successfully");
-
-      fetchPackages();
-
-      setShowForm(false);
-
-    }
-
-    catch (error) {
-
-      console.log(error);
-
-      alert("Failed To Add Package");
-
-    }
-
-  }
-
-  async function handleDelete(id) {
-
-    try {
-
-      await API.delete(
-
-        `/packages/delete/${id}/`
-
-      );
-
-      fetchPackages();
-
-    }
-
-    catch (error) {
-
-      console.log(error);
-
-    }
-
-  }
-
   return (
-
-    <section className="dashboard-section">
-
-      <div className="section-header">
-
-        <h2>
-          Package Management
-        </h2>
-
-        <button
-          onClick={() => setShowForm(!showForm)}
-        >
-          {showForm ? "Close Form" : "Add Package"}
-        </button>
-
-      </div>
-
-      {showForm && (
-
-        <form
-          className="package-form"
-          onSubmit={handleAddPackage}
-        >
-
-          <input
-            type="text"
-            name="title"
-            placeholder="Package Title"
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="text"
-            name="location"
-            placeholder="Location"
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="text"
-            name="duration"
-            placeholder="Duration"
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="number"
-            name="price"
-            placeholder="Price"
-            onChange={handleChange}
-            required
-          />
-
-          <textarea
-            name="description"
-            placeholder="Description"
-            onChange={handleChange}
-            required
-          />
-
-          <input
-            type="file"
-            onChange={handleImage}
-            required
-          />
-
-          <button type="submit">
-
-            Save Package
-
-          </button>
-
-        </form>
-
-      )}
-
-      <div className="package-grid">
-
-        {packages.map((pkg) => (
-
-          <div
-            className="package-card"
-            key={pkg.id}
-          >
-
-            <img
-              src={pkg.image}
-              alt={pkg.title}
-            />
-
-            <h3>
-              {pkg.title}
-            </h3>
-
-            <p>
-              {pkg.location}
-            </p>
-
-            <span>
-              NPR {pkg.price}
-            </span>
-
-            <button
-              onClick={() => handleDelete(pkg.id)}
-            >
-              Delete
-            </button>
-
-          </div>
-
-        ))}
-
-      </div>
-
-    </section>
-
+    <CrudSection
+      title="Package Management"
+      subtitle="Create and manage tour packages shown on the website."
+      endpoint="/packages"
+      itemLabel="Package"
+      fields={FIELDS}
+      columns={COLUMNS}
+    />
   );
 
 }

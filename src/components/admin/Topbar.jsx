@@ -1,176 +1,87 @@
-import {
+import { useNavigate } from "react-router-dom";
 
-  useNavigate
+import { FiExternalLink, FiLogOut, FiMenu } from "react-icons/fi";
 
-}
-
-from "react-router-dom";
+import { clearAuth, getStoredUser } from "../../api/api";
 
 import "./Topbar.css";
 
-function Topbar(){
+function Topbar({ title, onMenuClick }) {
 
   const navigate = useNavigate();
 
-  /* =========================
-     GET ADMIN USER
-  ========================= */
+  const user = getStoredUser();
 
-  const user = JSON.parse(
+  const name = user?.name || user?.email || "Admin";
 
-    localStorage.getItem("user")
+  function handleLogout() {
 
-  );
+    clearAuth();
 
-  /* =========================
-     LOGOUT
-  ========================= */
-
-  function handleLogout(){
-
-    localStorage.clear();
-
-    navigate("/login");
-
-    window.location.reload();
+    navigate("/login", { replace: true });
 
   }
 
   return (
 
-    <div className="topbar">
-
-      {/* =========================
-          LEFT
-      ========================= */}
+    <header className="topbar">
 
       <div className="topbar-left">
 
-        <h1>
+        <button
+          type="button"
+          className="topbar-icon-btn topbar-menu-btn"
+          aria-label="Open menu"
+          onClick={onMenuClick}
+        >
+          <FiMenu />
+        </button>
 
-          Yatra Admin Dashboard
-
-        </h1>
-
-        <p>
-
-          Manage your luxury travel platform
-
-        </p>
+        <div className="topbar-title">
+          <span>Yatra Admin</span>
+          <h1>{title}</h1>
+        </div>
 
       </div>
-
-      {/* =========================
-          RIGHT
-      ========================= */}
 
       <div className="topbar-right">
 
-        {/* SEARCH */}
-
-        <div className="search-box">
-
-          <input
-
-            type="text"
-
-            placeholder="Search bookings, packages, customers..."
-
-          />
-
-        </div>
-
-        {/* NOTIFICATION */}
-
-        <div className="notification-icon">
-
-          🔔
-
-          <span>
-
-            3
-
-          </span>
-
-        </div>
-
-        {/* WEBSITE BUTTON */}
-
         <button
-
-          className="frontend-btn"
-
-          onClick={()=>navigate("/")}
-
+          type="button"
+          className="topbar-btn"
+          onClick={() => navigate("/")}
+          title="Open website"
         >
-
-          Open Website
-
+          <FiExternalLink aria-hidden="true" />
+          <span className="topbar-btn-label">View Website</span>
         </button>
-
-        {/* ADMIN PROFILE */}
 
         <div className="admin-profile">
 
-          <div className="admin-avatar">
-
-            {
-
-              user?.name
-
-              ?
-
-              user.name.charAt(0).toUpperCase()
-
-              :
-
-              "A"
-
-            }
-
+          <div className="topbar-avatar">
+            {name.charAt(0).toUpperCase()}
           </div>
 
           <div className="admin-details">
-
-            <h4>
-
-              {
-
-                user?.name ||
-
-                "Admin"
-
-              }
-
-            </h4>
-
-            <span>
-
-              Super Administrator
-
-            </span>
-
+            <h4>{name}</h4>
+            <span>{user?.is_superuser ? "Super Administrator" : "Administrator"}</span>
           </div>
 
         </div>
 
-        {/* LOGOUT */}
-
         <button
-
-          className="logout-top-btn"
-
+          type="button"
+          className="topbar-icon-btn topbar-logout-btn"
+          aria-label="Logout"
+          title="Logout"
           onClick={handleLogout}
-
         >
-
-          Logout
-
+          <FiLogOut />
         </button>
 
       </div>
 
-    </div>
+    </header>
 
   );
 

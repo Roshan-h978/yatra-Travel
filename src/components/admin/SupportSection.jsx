@@ -1,329 +1,208 @@
-import "./SupportSection.css";
+import { useState } from "react";
+
+import API, { getErrorMessage } from "../../api/api";
+
+import { FiArchive, FiCheckCircle, FiClock, FiCornerUpLeft, FiInbox, FiSend, FiTrash2, FiXCircle } from "react-icons/fi";
+
+import { StatusPill } from "./CrudSection";
+
+import StatCard from "./StatCard";
+
+import useAdminData from "./useAdminData";
 
 function SupportSection() {
 
+  const { data: messages, loading, error, reload } = useAdminData("/support/");
+
+  const [filter, setFilter] = useState("Pending");
+
+  const [replyingId, setReplyingId] = useState(null);
+
+  const [replyText, setReplyText] = useState("");
+
+  const [sending, setSending] = useState(false);
+
+  const [notice, setNotice] = useState(null);
+
+  function startReply(msg) {
+
+    setReplyingId(msg.id);
+    setReplyText(msg.admin_reply || "");
+
+  }
+
+  async function sendReply(id) {
+
+    setSending(true);
+    setNotice(null);
+
+    try {
+
+      await API.put(`/support/reply/${id}/`, { admin_reply: replyText });
+      setNotice({ type: "success", text: "Reply sent to the customer by email." });
+      setReplyingId(null);
+      reload();
+
+    } catch (err) {
+
+      setNotice({ type: "error", text: getErrorMessage(err) });
+
+    } finally {
+
+      setSending(false);
+
+    }
+
+  }
+
+  async function runAction(request, successText) {
+
+    try {
+
+      await request;
+      setNotice({ type: "success", text: successText });
+      reload();
+
+    } catch (err) {
+
+      setNotice({ type: "error", text: getErrorMessage(err) });
+
+    }
+
+  }
+
+  function closeMessage(id) {
+
+    runAction(API.put(`/support/close/${id}/`), "Conversation closed.");
+
+  }
+
+  function deleteMessage(id) {
+
+    if (!window.confirm("Delete this message?")) return;
+
+    runAction(API.delete(`/support/delete/${id}/`), "Message deleted.");
+
+  }
+
+  const count = (status) => messages.filter((m) => m.status === status).length;
+
+  const visible = filter === "All" ? messages : messages.filter((m) => m.status === filter);
+
   return (
 
-    <section className="dashboard-section">
+    <section className="admin-section">
 
-      {/* =========================
-          HEADER
-      ========================= */}
-
-      <div className="section-header">
+      <div className="admin-section-header">
 
         <div>
-
-          <h2>
-
-            Customer Support Center
-
-          </h2>
-
-          <p>
-
-            Manage customer chats, inquiries, and live support
-
-          </p>
-
-        </div>
-
-        <div className="support-header-actions">
-
-          <button className="chat-open-btn">
-
-            Open Frontend Chat
-
-          </button>
-
-          <button className="support-status-btn">
-
-            Online
-
-          </button>
-
+          <h2>Customer Support</h2>
+          <p>Messages sent from the website contact form.</p>
         </div>
 
       </div>
 
-      {/* =========================
-          SUPPORT OVERVIEW
-      ========================= */}
+      <div className="admin-stats-grid">
 
-      <div className="support-overview">
+        <StatCard icon={FiClock} tone="amber" label="Pending" value={count("Pending")} />
 
-        <div className="support-card">
+        <StatCard icon={FiCheckCircle} tone="blue" label="Replied" value={count("Replied")} />
 
-          <h3>128</h3>
+        <StatCard icon={FiArchive} tone="green" label="Closed" value={count("Closed")} />
 
-          <p>Total Messages</p>
-
-        </div>
-
-        <div className="support-card">
-
-          <h3>12</h3>
-
-          <p>Pending Replies</p>
-
-        </div>
-
-        <div className="support-card">
-
-          <h3>5</h3>
-
-          <p>Live Chats</p>
-
-        </div>
-
-        <div className="support-card">
-
-          <h3>98%</h3>
-
-          <p>Customer Satisfaction</p>
-
-        </div>
+        <StatCard icon={FiInbox} label="Total" value={messages.length} />
 
       </div>
 
-      {/* =========================
-          SYSTEM STATUS
-      ========================= */}
+      {notice && <div className={`admin-alert admin-alert--${notice.type}`} role="status">{notice.text}</div>}
 
-      <div className="support-box">
+      <div className="admin-card">
 
-        <div className="support-box-top">
-
-          <div className="support-indicator"></div>
-
-          <h3>
-
-            Frontend Chatbot Connected
-
-          </h3>
-
+        <div className="admin-filter-row">
+          {["Pending", "Replied", "Closed", "All"].map((s) => (
+            <button
+              key={s}
+              type="button"
+              className={`admin-btn admin-btn--sm ${filter === s ? "admin-btn--dark" : "admin-btn--ghost"}`}
+              onClick={() => setFilter(s)}
+            >
+              {s}
+            </button>
+          ))}
         </div>
 
-        <p>
+        {loading && <p className="admin-loading-text">Loading messages...</p>}
 
-          Customer inquiries from the Yatra website chatbot
-          will appear here for admin support handling and
-          real-time communication.
+        {!loading && error && <div className="admin-alert admin-alert--error">{error}</div>}
 
-        </p>
+        {!loading && !error && visible.length === 0 && (
+          <p className="admin-loading-text">No {filter === "All" ? "" : filter.toLowerCase() + " "}messages.</p>
+        )}
 
-      </div>
+        <div className="admin-list">
 
-      {/* =========================
-          CHAT LIST
-      ========================= */}
+          {!loading && !error && visible.map((m) => (
 
-      <div className="chat-list">
+            <div className="admin-list-item" key={m.id}>
 
-        {/* CHAT 1 */}
+              <div className="admin-list-body">
 
-        <div className="chat-card">
+                <h4>{m.subject} <StatusPill value={m.status} /></h4>
 
-          <div className="chat-top">
+                <p>{m.customer_name} · {m.email} · {new Date(m.created_at).toLocaleString()}</p>
 
-            <div className="chat-user">
+                <p className="admin-message">{m.message}</p>
 
-              <div className="chat-avatar">
+                {m.admin_reply && replyingId !== m.id && (
+                  <div className="admin-quote"><strong>Your reply:</strong> {m.admin_reply}</div>
+                )}
 
-                S
+                {replyingId === m.id && (
+
+                  <div className="admin-reply-box">
+
+                    <textarea
+                      aria-label="Reply"
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Write your reply..."
+                    />
+
+                    <div className="admin-actions">
+                      <button type="button" className="admin-btn admin-btn--primary admin-btn--sm"
+                        disabled={sending || !replyText.trim()} onClick={() => sendReply(m.id)}>
+                        <FiSend aria-hidden="true" /> {sending ? "Sending..." : "Send Reply"}
+                      </button>
+                      <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" onClick={() => setReplyingId(null)}>
+                        Cancel
+                      </button>
+                    </div>
+
+                  </div>
+
+                )}
 
               </div>
 
-              <div>
+              <div className="admin-actions">
 
-                <h4>
+                {replyingId !== m.id && (
+                  <button type="button" className="admin-btn admin-btn--dark admin-btn--sm" onClick={() => startReply(m)}>
+                    <FiCornerUpLeft aria-hidden="true" /> {m.admin_reply ? "Edit Reply" : "Reply"}
+                  </button>
+                )}
 
-                  Shayan Karki
+                {m.status !== "Closed" && (
+                  <button type="button" className="admin-btn admin-btn--ghost admin-btn--sm" onClick={() => closeMessage(m.id)}><FiXCircle aria-hidden="true" /> Close</button>
+                )}
 
-                </h4>
-
-                <span>
-
-                  5 minutes ago
-
-                </span>
+                <button type="button" className="admin-btn admin-btn--danger admin-btn--sm" onClick={() => deleteMessage(m.id)}><FiTrash2 aria-hidden="true" /> Delete</button>
 
               </div>
 
             </div>
 
-            <span className="chat-status active">
-
-              Active
-
-            </span>
-
-          </div>
-
-          <div className="chat-message">
-
-            <p>
-
-              Hello, is the Mustang luxury package
-              available next week?
-
-            </p>
-
-          </div>
-
-          <div className="chat-actions">
-
-            <button className="reply-btn">
-
-              Reply
-
-            </button>
-
-            <button className="view-btn">
-
-              View Chat
-
-            </button>
-
-          </div>
-
-        </div>
-
-        {/* CHAT 2 */}
-
-        <div className="chat-card">
-
-          <div className="chat-top">
-
-            <div className="chat-user">
-
-              <div className="chat-avatar">
-
-                R
-
-              </div>
-
-              <div>
-
-                <h4>
-
-                  Rohan Sharma
-
-                </h4>
-
-                <span>
-
-                  20 minutes ago
-
-                </span>
-
-              </div>
-
-            </div>
-
-            <span className="chat-status pending">
-
-              Pending
-
-            </span>
-
-          </div>
-
-          <div className="chat-message">
-
-            <p>
-
-              Can I book airport pickup
-              with the Prado SUV?
-
-            </p>
-
-          </div>
-
-          <div className="chat-actions">
-
-            <button className="reply-btn">
-
-              Reply
-
-            </button>
-
-            <button className="view-btn">
-
-              View Chat
-
-            </button>
-
-          </div>
-
-        </div>
-
-        {/* CHAT 3 */}
-
-        <div className="chat-card">
-
-          <div className="chat-top">
-
-            <div className="chat-user">
-
-              <div className="chat-avatar">
-
-                A
-
-              </div>
-
-              <div>
-
-                <h4>
-
-                  Alex Johnson
-
-                </h4>
-
-                <span>
-
-                  1 hour ago
-
-                </span>
-
-              </div>
-
-            </div>
-
-            <span className="chat-status resolved">
-
-              Resolved
-
-            </span>
-
-          </div>
-
-          <div className="chat-message">
-
-            <p>
-
-              What is included in the
-              Pokhara premium package?
-
-            </p>
-
-          </div>
-
-          <div className="chat-actions">
-
-            <button className="reply-btn">
-
-              Reply
-
-            </button>
-
-            <button className="view-btn">
-
-              View Chat
-
-            </button>
-
-          </div>
+          ))}
 
         </div>
 

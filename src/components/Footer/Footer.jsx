@@ -1,10 +1,10 @@
 import "./Footer.css";
 
+import { Link } from "react-router-dom";
+
 import {
   FaFacebookF,
   FaInstagram,
-  FaTwitter,
-  FaYoutube,
   FaMapMarkerAlt,
   FaPhoneAlt,
   FaEnvelope,
@@ -26,15 +26,15 @@ function Footer() {
           </p>
 
           <div className="social-icons">
-            <a href="#">
+            <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
               <FaFacebookF />
             </a>
 
-            <a href="#">
+            <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
               <FaInstagram />
             </a>
 
-            <a href="#">
+            <a href="https://wa.me/9779800000000" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
               <FaWhatsapp />
             </a>
           </div>
@@ -45,11 +45,11 @@ function Footer() {
         <div className="footer-links">
           <h3>Quick Links</h3>
 
-          <a href="#">Home</a>
-          <a href="#">Vehicles</a>
-          <a href="#">Packages</a>
-          <a href="#">Bookings</a>
-          <a href="#">Contact</a>
+          <Link to="/">Home</Link>
+          <Link to="/vehicles">Vehicles</Link>
+          <Link to="/packages">Packages</Link>
+          <Link to="/booking">Bookings</Link>
+          <Link to="/contact">Contact</Link>
         </div>
 
         {/* SERVICES */}
@@ -57,9 +57,9 @@ function Footer() {
         <div className="footer-links">
           <h3>Services</h3>
 
-          <a href="./vehicles">Car Rentals</a>
-          <a href="./packages">Tour Packages</a>
-          <a href="./luxury-vehicles">Luxury Vehicles</a>
+          <Link to="/vehicles">Car Rentals</Link>
+          <Link to="/packages">Tour Packages</Link>
+          <Link to="/vehicles?type=Luxury">Luxury Vehicles</Link>
         </div>
 
         {/* CONTACT */}
@@ -79,7 +79,7 @@ function Footer() {
 
           <div className="contact-item">
             <FaEnvelope />
-            <span>info@yatra.com</span>
+            <span>info@yatratravel.com</span>
           </div>
         </div>
       </div>
