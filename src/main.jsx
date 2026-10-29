@@ -16,7 +16,7 @@ from "@react-oauth/google";
 
 const GOOGLE_CLIENT_ID =
   import.meta.env.VITE_GOOGLE_CLIENT_ID ||
-  "1056481750509-tamjc8high1hpu06vcjs3c806o1st2cv.apps.googleusercontent.com";
+  "510753548896-l1vfu7jo2sjq43o0o3vqk83ned0hpopk.apps.googleusercontent.com";
 
 ReactDOM.createRoot(
 

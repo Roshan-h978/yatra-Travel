@@ -277,17 +277,33 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
 
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    'CORS_ALLOWED_ORIGINS',
-    'http://localhost:5173,http://127.0.0.1:5173'
-).split(',')
+# Exact site addresses. Spaces and trailing slashes are tidied, because
+# "https://site.vercel.app/" (with a slash) would never match the browser's Origin.
+CORS_ALLOWED_ORIGINS = [
+    origin.strip().rstrip('/')
+    for origin in os.environ.get(
+        'CORS_ALLOWED_ORIGINS',
+        'http://localhost:5173,http://127.0.0.1:5173'
+    ).split(',')
+    if origin.strip()
+]
+
+# Also accept this project's Vercel addresses (production + preview deployments),
+# e.g. https://yatra-travel-abc123.vercel.app. Override with CORS_ALLOWED_ORIGIN_REGEXES.
+# The API authenticates with Bearer tokens, not cookies, so this does not expose sessions.
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    pattern.strip()
+    for pattern in os.environ.get(
+        'CORS_ALLOWED_ORIGIN_REGEXES',
+        r'^https://yatra-travel[a-z0-9-]*\.vercel\.app$'
+    ).split(',')
+    if pattern.strip()
+]
 
 # In development, also accept the Vite dev server on any local port
 # (Vite moves to 5174, 5175, ... when 5173 is already taken).
 if DEBUG:
-    CORS_ALLOWED_ORIGIN_REGEXES = [
-        r'^http://(localhost|127\.0\.0\.1):\d+$',
-    ]
+    CORS_ALLOWED_ORIGIN_REGEXES.append(r'^http://(localhost|127\.0\.0\.1):\d+$')
 
 AUTHENTICATION_BACKENDS = [
     'users.authentication.EmailOrUsernameModelBackend',
@@ -295,7 +311,7 @@ AUTHENTICATION_BACKENDS = [
 
 GOOGLE_CLIENT_ID = os.environ.get(
     'GOOGLE_CLIENT_ID',
-    '1056481750509-tamjc8high1hpu06vcjs3c806o1st2cv.apps.googleusercontent.com'
+    '510753548896-l1vfu7jo2sjq43o0o3vqk83ned0hpopk.apps.googleusercontent.com'
 )
 
 # =========================

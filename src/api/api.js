@@ -1,7 +1,18 @@
 import axios from "axios";
 
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";
+// Accepts the backend address with or without "/api" and a trailing slash,
+// e.g. "https://x.onrender.com", "https://x.onrender.com/" or ".../api".
+function normalizeApiUrl(url) {
+
+  const base = url.trim().replace(/\/+$/, "");
+
+  return base.endsWith("/api") ? base : `${base}/api`;
+
+}
+
+export const API_BASE_URL = normalizeApiUrl(
+  import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api"
+);
 
 const API = axios.create({
 
@@ -59,6 +70,13 @@ export function isAdminUser(user = getStoredUser()) {
 }
 
 export function getErrorMessage(error, fallback = "Something went wrong. Please try again.") {
+
+  // No response at all: server down / asleep, wrong API address, or blocked by CORS.
+  if (error && !error.response) {
+
+    return "Can't reach the server right now. Please try again in a minute.";
+
+  }
 
   const data = error?.response?.data;
 
