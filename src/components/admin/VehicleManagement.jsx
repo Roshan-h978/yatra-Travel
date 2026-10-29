@@ -1,3 +1,5 @@
+import { VEHICLE_TYPES } from "../../constants/vehicles";
+
 import CrudSection, { StatusPill } from "./CrudSection";
 
 const FIELDS = [
@@ -5,7 +7,7 @@ const FIELDS = [
   { name: "brand", label: "Brand", required: true },
   { name: "price_per_day", label: "Price Per Day (NPR)", type: "number", min: 0, required: true },
   { name: "seats", label: "Seats", type: "number", min: 1, required: true },
-  { name: "vehicle_type", label: "Vehicle Type", type: "select", options: ["SUV", "Luxury", "Jeep", "Bike"], default: "SUV" },
+  { name: "vehicle_type", label: "Vehicle Type", type: "select", options: VEHICLE_TYPES, default: "SUV" },
   { name: "rental_type", label: "Rental Type", type: "select", options: ["Self Drive", "With Driver"], default: "Self Drive" },
   { name: "transmission", label: "Transmission", required: true },
   { name: "fuel_type", label: "Fuel Type", required: true },

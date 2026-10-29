@@ -13,7 +13,7 @@ from "../components/Footer/Footer";
 
 import "./Vehicles.css";
 
-const VEHICLE_TYPES = ["SUV", "Luxury", "Jeep", "Bike"];
+import { VEHICLE_TYPES } from "../constants/vehicles";
 
 function Vehicles() {
 

@@ -184,9 +184,6 @@
 
 @media(max-width:700px){
 
-  .packages-header h1{
-    font-size:var(--fs-page-title);
-  }
 
   .packages-grid{
     grid-template-columns:1fr;

@@ -302,27 +302,6 @@
   font-weight:600;
 }
 
-/* GOOGLE BUTTON */
-
-
-/* SHINE EFFECT */
-
-
-/* HOVER */
-
-
-/* SHINE MOVE */
-
-
-/* ICON */
-
-
-/* TEXT */
-
-
-/* ACTIVE */
-
-
 /* LOGIN LINK */
 
 .login-link{
@@ -498,9 +477,6 @@
 
 @media(max-width:700px){
 
-  .register-content h1{
-    font-size:var(--fs-page-title);
-  }
 
   .register-content span{
     font-size:15px;

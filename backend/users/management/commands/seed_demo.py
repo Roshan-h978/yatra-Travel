@@ -1,16 +1,25 @@
+import os
+import secrets
+
+from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 
 from drivers.models import Driver
 from packages_app.models import Package
 from vehicles.models import Vehicle
 
 
-# Local development only. Change these before using the data anywhere shared.
+# Local development only. No passwords live in the code: set DEMO_ADMIN_PASSWORD /
+# DEMO_CUSTOMER_PASSWORD in your environment, or a random one is generated and
+# printed once when the account is first created.
 DEMO_ADMIN_EMAIL = "admin@yatra.local"
-DEMO_ADMIN_PASSWORD = "***REMOVED***"
 DEMO_CUSTOMER_EMAIL = "customer@yatra.local"
-DEMO_CUSTOMER_PASSWORD = "***REMOVED***"
+
+
+def demo_password(env_name):
+
+    return os.environ.get(env_name) or secrets.token_urlsafe(12)
 
 
 class Command(BaseCommand):
@@ -19,7 +28,13 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        # Demo accounts must never exist on the live site.
+        if not settings.DEBUG:
+            raise CommandError("seed_demo is for local development only (DJANGO_DEBUG is off).")
+
         User = get_user_model()
+
+        created_logins = []
 
         admin, created = User.objects.get_or_create(
             username=DEMO_ADMIN_EMAIL,
@@ -32,16 +47,20 @@ class Command(BaseCommand):
         )
 
         if created:
-            admin.set_password(DEMO_ADMIN_PASSWORD)
+            password = demo_password("DEMO_ADMIN_PASSWORD")
+            admin.set_password(password)
             admin.save()
+            created_logins.append(("Admin", DEMO_ADMIN_EMAIL, password))
 
         if not User.objects.filter(email__iexact=DEMO_CUSTOMER_EMAIL).exists():
+            password = demo_password("DEMO_CUSTOMER_PASSWORD")
             User.objects.create_user(
                 username=DEMO_CUSTOMER_EMAIL,
                 email=DEMO_CUSTOMER_EMAIL,
-                password=DEMO_CUSTOMER_PASSWORD,
+                password=password,
                 first_name="Demo Customer",
             )
+            created_logins.append(("Customer", DEMO_CUSTOMER_EMAIL, password))
 
         vehicles = [
             ("Land Cruiser Prado", "Toyota", 12000, "SUV", "With Driver", 7, "vehicles/toyota.jpg"),
@@ -85,6 +104,9 @@ class Command(BaseCommand):
             },
         )
 
+        for role, email, password in created_logins:
+            self.stdout.write(f"{role} login: {email} / {password}")
+
         self.stdout.write(self.style.SUCCESS(
-            f"Demo data ready. Admin: {DEMO_ADMIN_EMAIL}, customer: {DEMO_CUSTOMER_EMAIL} (passwords in users/management/commands/seed_demo.py)"
+            "Demo data ready. Existing demo accounts keep their current passwords."
         ))

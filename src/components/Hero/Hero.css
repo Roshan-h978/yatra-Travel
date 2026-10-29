@@ -210,8 +210,7 @@
   color:#0F172A;
 }
 
-.booking-field select,
-.booking-field input{
+.booking-field select{
   width:100%;
   height:48px;
   border:1px solid #E2E8F0;

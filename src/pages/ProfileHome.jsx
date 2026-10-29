@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 
 import {
   FiAlertCircle,
@@ -21,13 +21,17 @@ import {
   FiXCircle,
 } from "react-icons/fi";
 
-import API, { clearAuth, getErrorMessage, getStoredUser } from "../api/api";
+import API, { getErrorMessage, getStoredUser } from "../api/api";
 
 import Navbar from "../components/Navbar/Navbar";
 
 import Footer from "../components/Footer/Footer";
 
 import PasswordInput from "../components/PasswordInput/PasswordInput";
+
+import useLogout from "../hooks/useLogout";
+
+import { daysBetween, formatDate, localToday } from "../utils/dates";
 
 import "./ProfileHome.css";
 
@@ -42,28 +46,6 @@ const TABS = [
   { id: "account", label: "Account", icon: FiUser },
   { id: "security", label: "Security", icon: FiLock },
 ];
-
-function localToday() {
-
-  const d = new Date();
-
-  return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-
-}
-
-function formatDate(value) {
-
-  return new Date(`${value}T00:00:00`).toLocaleDateString(undefined, {
-    day: "numeric", month: "short", year: "numeric",
-  });
-
-}
-
-function daysBetween(from, to) {
-
-  return Math.round((new Date(`${to}T00:00:00`) - new Date(`${from}T00:00:00`)) / 86400000);
-
-}
 
 function tripTitle(b) {
 
@@ -124,8 +106,6 @@ function passwordStrength(pw) {
 ========================= */
 
 function ProfileHome() {
-
-  const navigate = useNavigate();
 
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -200,13 +180,7 @@ function ProfileHome() {
 
   }
 
-  function logout() {
-
-    clearAuth();
-
-    navigate("/login", { replace: true });
-
-  }
+  const logout = useLogout();
 
   return (
 

@@ -64,9 +64,6 @@
 
 /* TITLE */
 
-.section-title{
-  margin-bottom:28px;
-}
 
 .section-title h2{
   color:#0F172A;
@@ -141,24 +138,6 @@
   font-weight:700;
 }
 
-/* RESPONSIVE */
-
-@media(max-width:700px){
-
-  .services-page{
-    padding:var(--page-pad-top) var(--page-pad-x) var(--section-pad-y);
-  }
-
-  .services-page .services-header h1{
-    font-size:var(--fs-page-title);
-  }
-
-  .section-title h2{
-    font-size:clamp(20px, 2.2vw, 28px);
-  }
-
-}
-
 /* CARDS ARE LINKS TO BOOKING */
 
 .services-page .service-item{
@@ -172,7 +151,7 @@
 }
 
 .section-title{
-  position:relative;
+  margin-bottom:28px;
 }
 
 .service-view-all{

@@ -363,21 +363,6 @@
 
 }
 
-@media(max-width:700px){
-
-  .home-page .services-header h1,
-  .experience-left h1{
-    font-size:var(--fs-section-title);
-  }
-
-  .experience-image{
-    height:clamp(260px, 36vw, 460px);
-  }
-
-}
-
-
-
 /* DESTINATION CARDS ARE LINKS */
 
 .destination-card{

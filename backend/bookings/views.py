@@ -9,7 +9,7 @@ from rest_framework.response import Response
 from drivers.models import Driver
 from vehicles.models import Vehicle
 
-from .models import Booking
+from .models import ACTIVE_STATUSES, Booking
 
 from .serializers import BookingSerializer, has_overlap
 from services.email_utils import send_booking_email
@@ -23,8 +23,6 @@ ALLOWED_TRANSITIONS = {
     "Completed": set(),
     "Cancelled": set(),
 }
-
-ACTIVE_STATUSES = ["Pending", "Approved"]
 
 
 def calculate_total_price(vehicle, package, pickup_date, return_date):
@@ -136,8 +134,6 @@ def create_booking(request):
             )
         )
 
-    # SEND EMAIL
-
     send_booking_email(
         customer_email(booking),
         booking.full_name,
@@ -161,7 +157,7 @@ def cancel_my_booking(request, id):
 
     booking = get_object_or_404(Booking, id=id, user=request.user)
 
-    if booking.status not in ("Pending", "Approved"):
+    if booking.status not in ACTIVE_STATUSES:
 
         return Response({"error": f"A {booking.status.lower()} booking cannot be cancelled."}, status=400)
 
@@ -211,7 +207,7 @@ def update_booking_status(request, id):
             )
 
         # Re-opening or approving must not clash with another active booking.
-        if status in ("Approved", "Pending") and booking.vehicle:
+        if status in ACTIVE_STATUSES and booking.vehicle:
 
             if status == "Approved" and booking.vehicle.status == "Maintenance":
 
@@ -253,8 +249,6 @@ def update_booking_status(request, id):
     if status_changed:
 
         sync_vehicle_status(booking.vehicle)
-
-        # SEND EMAIL
 
         send_booking_email(
             customer_email(booking),

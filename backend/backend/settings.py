@@ -212,7 +212,7 @@ USE_SUPABASE_STORAGE = bool(
 )
 
 if USE_SUPABASE_STORAGE:
-    DEFAULT_FILE_STORAGE_BACKEND = {
+    _default_storage = {
         'BACKEND': 'storages.backends.s3.S3Storage',
         'OPTIONS': {
             'bucket_name': SUPABASE_STORAGE_BUCKET,
@@ -230,12 +230,12 @@ if USE_SUPABASE_STORAGE:
         },
     }
 else:
-    DEFAULT_FILE_STORAGE_BACKEND = {
+    _default_storage = {
         'BACKEND': 'django.core.files.storage.FileSystemStorage',
     }
 
 STORAGES = {
-    'default': DEFAULT_FILE_STORAGE_BACKEND,
+    'default': _default_storage,
     'staticfiles': {
         # Compressed + cache-busted file names in production.
         'BACKEND': (

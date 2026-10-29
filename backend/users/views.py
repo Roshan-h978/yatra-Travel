@@ -86,7 +86,7 @@ def auth_response(user, message, **extra):
 
 
 # =========================================
-# REGISTER USER
+# AUTH RATE LIMIT
 # =========================================
 
 class AuthRateThrottle(SimpleRateThrottle):
@@ -98,6 +98,10 @@ class AuthRateThrottle(SimpleRateThrottle):
 
         return self.cache_format % {"scope": self.scope, "ident": self.get_ident(request)}
 
+
+# =========================================
+# REGISTER USER
+# =========================================
 
 @api_view(["POST"])
 @permission_classes([AllowAny])

@@ -210,9 +210,6 @@
 
 @media(max-width:700px){
 
-  .page-header h1{
-    font-size:var(--fs-page-title);
-  }
 
   .vehicle-page-grid{
     grid-template-columns:1fr;

@@ -1,28 +1,20 @@
 import "./Sidebar.css";
 
-import { useNavigate } from "react-router-dom";
-
 import { FiLogOut, FiX } from "react-icons/fi";
 
-import { clearAuth, getStoredUser } from "../../api/api";
+import { getStoredUser } from "../../api/api";
+
+import useLogout from "../../hooks/useLogout";
 
 import ADMIN_MENU from "./adminMenu";
 
 function Sidebar({ activeSection, onSelect, open, onClose }) {
 
-  const navigate = useNavigate();
-
   const user = getStoredUser();
 
   const name = user?.name || user?.email || "Admin";
 
-  function handleLogout() {
-
-    clearAuth();
-
-    navigate("/login", { replace: true });
-
-  }
+  const handleLogout = useLogout();
 
   return (
 

@@ -1,17 +1,11 @@
-from django.urls import path
+from backend.crud import crud_urlpatterns
 
-from .views import *
+from . import views
 
-urlpatterns = [
-
-    path("", get_drivers),
-
-    path("<int:id>/", get_driver),
-
-    path("add/", add_driver),
-
-    path("update/<int:id>/", update_driver),
-
-    path("delete/<int:id>/", delete_driver),
-
-]
+urlpatterns = crud_urlpatterns(
+    views.get_drivers,
+    views.get_driver,
+    views.add_driver,
+    views.update_driver,
+    views.delete_driver,
+)

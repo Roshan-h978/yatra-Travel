@@ -2,7 +2,7 @@ from django.utils import timezone
 
 from rest_framework import serializers
 
-from .models import Booking
+from .models import ACTIVE_STATUSES, Booking
 
 
 MAX_BOOKING_DAYS = 60
@@ -14,7 +14,7 @@ def has_overlap(vehicle, pickup, return_date, exclude_id=None):
 
     qs = Booking.objects.filter(
         vehicle=vehicle,
-        status__in=["Pending", "Approved"],
+        status__in=ACTIVE_STATUSES,
         pickup_date__lte=return_date,
         return_date__gte=pickup,
     )

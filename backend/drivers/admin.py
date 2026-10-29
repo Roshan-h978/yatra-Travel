@@ -4,33 +4,7 @@ from .models import Driver
 
 
 @admin.register(Driver)
-
 class DriverAdmin(admin.ModelAdmin):
-
-    list_display = [
-
-        'id',
-
-        'full_name',
-
-        'phone',
-
-        'status',
-
-        'experience_years'
-
-    ]
-
-    search_fields = [
-
-        'full_name',
-
-        'phone'
-
-    ]
-
-    list_filter = [
-
-        'status'
-
-    ]
+    list_display = ['id', 'full_name', 'phone', 'email', 'license_number', 'experience_years', 'status']
+    search_fields = ['full_name', 'phone', 'email', 'license_number']
+    list_filter = ['status']

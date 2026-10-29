@@ -132,7 +132,7 @@ img{
   align-items:center;
   justify-content:center;
   gap:16px;
-  padding:calc(var(--nav-height) + 40px) var(--page-x) 60px;
+  padding:calc(var(--nav-height) + 40px) var(--page-pad-x) 60px;
   text-align:center;
 }
 

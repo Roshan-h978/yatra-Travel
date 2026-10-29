@@ -2,7 +2,9 @@ import { useNavigate } from "react-router-dom";
 
 import { FiExternalLink, FiLogOut, FiMenu } from "react-icons/fi";
 
-import { clearAuth, getStoredUser } from "../../api/api";
+import { getStoredUser } from "../../api/api";
+
+import useLogout from "../../hooks/useLogout";
 
 import "./Topbar.css";
 
@@ -14,13 +16,7 @@ function Topbar({ title, onMenuClick }) {
 
   const name = user?.name || user?.email || "Admin";
 
-  function handleLogout() {
-
-    clearAuth();
-
-    navigate("/login", { replace: true });
-
-  }
+  const handleLogout = useLogout();
 
   return (
 

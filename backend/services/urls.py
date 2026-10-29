@@ -2,7 +2,19 @@ from django.urls import path
 
 from .analytics_views import dashboard_analytics
 
-from .views import *
+from .views import (
+    close_support_message,
+    create_review,
+    create_support_message,
+    delete_review,
+    delete_support_message,
+    get_all_reviews,
+    get_my_reviews,
+    get_reviews,
+    get_support_messages,
+    reply_support_message,
+    update_review,
+)
 
 urlpatterns = [
 

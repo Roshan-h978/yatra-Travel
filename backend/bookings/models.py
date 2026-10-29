@@ -9,6 +9,10 @@ from packages_app.models import Package
 from drivers.models import Driver
 
 
+# Bookings that hold a vehicle: they block overlapping bookings and deletes.
+ACTIVE_STATUSES = ("Pending", "Approved")
+
+
 class Booking(models.Model):
 
     STATUS_CHOICES = [

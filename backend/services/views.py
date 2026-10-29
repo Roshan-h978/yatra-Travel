@@ -64,8 +64,6 @@ def reply_support_message(request, id):
     support.status = "Replied"
     support.save()
 
-    # SEND EMAIL
-
     send_support_reply_email(
         support.email,
         support.customer_name,

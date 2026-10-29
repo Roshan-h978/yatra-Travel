@@ -581,10 +581,6 @@
     overflow-wrap:anywhere;
   }
 
-  .admin-table .admin-muted{
-    margin-top:2px;
-  }
-
   .admin-table td::before{
     content:attr(data-label);
     flex-shrink:0;

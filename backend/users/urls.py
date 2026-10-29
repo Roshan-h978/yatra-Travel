@@ -1,6 +1,14 @@
 from django.urls import path
 
-from .views import *
+from .views import (
+    GoogleLoginView,
+    change_password,
+    current_user,
+    get_customers,
+    login_user,
+    register_user,
+    toggle_customer_active,
+)
 
 urlpatterns = [
 

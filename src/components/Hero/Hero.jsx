@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 const DESTINATIONS = ["Kathmandu", "Pokhara", "Mustang", "Chitwan", "Everest"];
 
-const VEHICLE_TYPES = ["SUV", "Luxury", "Jeep", "Bike"];
+import { VEHICLE_TYPES } from "../../constants/vehicles";
 
 function Hero() {
 

@@ -1,17 +1,11 @@
-from django.urls import path
+from backend.crud import crud_urlpatterns
 
-from .views import *
+from . import views
 
-urlpatterns = [
-
-    path("", get_packages),
-
-    path("<int:id>/", get_package),
-
-    path("add/", add_package),
-
-    path("update/<int:id>/", update_package),
-
-    path("delete/<int:id>/", delete_package),
-
-]
+urlpatterns = crud_urlpatterns(
+    views.get_packages,
+    views.get_package,
+    views.add_package,
+    views.update_package,
+    views.delete_package,
+)

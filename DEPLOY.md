@@ -51,7 +51,9 @@ Render / Vercel dashboards.
    ```bash
    python manage.py createsuperuser
    ```
-   > ⚠️ Do **not** run `seed_demo` in production: its demo passwords are public on GitHub.
+   > Render's free plan has no Shell. Instead, run `createsuperuser` on your own computer with
+   > `DATABASE_URL` set to the Supabase pooler link (PowerShell: `$env:DATABASE_URL = "..."`).
+   > `seed_demo` refuses to run in production; it is for local demo data only.
 
 ## 3. Vercel: frontend
 

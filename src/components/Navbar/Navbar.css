@@ -1,7 +1,7 @@
 .navbar{
   width:100%;
 
-  height:82px;
+  height:var(--nav-height);
 
   position:fixed;
   top:0;
@@ -120,9 +120,6 @@
   gap:14px;
 }
 
-.nav-buttons a{
-  text-decoration:none;
-}
 
 /* =========================
    NAV BUTTONS: slim pills with icons
@@ -269,7 +266,7 @@
     display:none;
 
     position:absolute;
-    top:82px;
+    top:var(--nav-height);
     left:0;
     right:0;
 

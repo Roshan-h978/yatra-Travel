@@ -1,6 +1,13 @@
 from django.urls import path
 
-from .views import *
+from .views import (
+    cancel_my_booking,
+    create_booking,
+    delete_booking,
+    get_bookings,
+    get_my_bookings,
+    update_booking_status,
+)
 
 urlpatterns = [
 

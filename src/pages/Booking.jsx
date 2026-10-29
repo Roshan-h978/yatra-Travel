@@ -8,24 +8,9 @@ import Navbar from "../components/Navbar/Navbar";
 
 import Footer from "../components/Footer/Footer";
 
+import { localToday, tripDays } from "../utils/dates";
+
 import "./Booking.css";
-
-// Local date as YYYY-MM-DD (toISOString alone would give the UTC date).
-function localToday() {
-
-  const d = new Date();
-
-  return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
-
-}
-
-function dayCount(pickup, ret) {
-
-  if (!pickup || !ret || ret < pickup) return 0;
-
-  return Math.round((new Date(ret) - new Date(pickup)) / 86400000) + 1;
-
-}
 
 function Booking() {
 
@@ -91,7 +76,7 @@ function Booking() {
 
   const estimate = useMemo(()=>{
 
-    const days = dayCount(pickupDate, returnDate);
+    const days = tripDays(pickupDate, returnDate);
 
     const vehicle = vehicles.find((v)=>String(v.id) === String(vehicleId));
 

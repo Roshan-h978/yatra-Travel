@@ -1,17 +1,11 @@
-from django.urls import path
+from backend.crud import crud_urlpatterns
 
-from .views import *
+from . import views
 
-urlpatterns = [
-
-    path("", get_vehicles),
-
-    path("<int:id>/", get_vehicle),
-
-    path("add/", add_vehicle),
-
-    path("update/<int:id>/", update_vehicle),
-
-    path("delete/<int:id>/", delete_vehicle),
-
-]
+urlpatterns = crud_urlpatterns(
+    views.get_vehicles,
+    views.get_vehicle,
+    views.add_vehicle,
+    views.update_vehicle,
+    views.delete_vehicle,
+)

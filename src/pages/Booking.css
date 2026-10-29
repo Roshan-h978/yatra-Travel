@@ -361,13 +361,6 @@
 
 @media(max-width:700px){
 
-  .booking-page{
-    padding:var(--page-pad-top) var(--page-pad-x) var(--section-pad-y);
-  }
-
-  .booking-header h1{
-    font-size:var(--fs-page-title);
-  }
 
   .booking-header span{
     font-size:16px;
@@ -382,9 +375,6 @@
     padding:30px;
   }
 
-  .booking-left h2{
-    font-size:clamp(20px, 2.2vw, 28px);
-  }
 
 }
 

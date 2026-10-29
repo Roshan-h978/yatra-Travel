@@ -10,7 +10,7 @@ function normalizeApiUrl(url) {
 
 }
 
-export const API_BASE_URL = normalizeApiUrl(
+const API_BASE_URL = normalizeApiUrl(
   import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api"
 );
 
@@ -213,16 +213,5 @@ API.interceptors.response.use(
   }
 
 );
-
-/* Turns a relative /media/... path into a full URL. */
-export function mediaUrl(path) {
-
-  if (!path) return "";
-
-  if (/^https?:\/\//.test(path)) return path;
-
-  return API_BASE_URL.replace(/\/api\/?$/, "") + path;
-
-}
 
 export default API;
