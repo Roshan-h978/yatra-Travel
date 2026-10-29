@@ -12,11 +12,21 @@ from django.conf import settings
 
 from django.conf.urls.static import static
 
+from django.http import JsonResponse
+
 from rest_framework_simplejwt.views import TokenRefreshView
+
+
+def health(request):
+
+    # Used by Render's health check; no database or login needed.
+    return JsonResponse({"status": "ok"})
 
 urlpatterns = [
 
     path('admin/', admin.site.urls),
+
+    path('api/health/', health),
 
     path('api/users/', include('users.urls')),
 

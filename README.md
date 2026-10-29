@@ -74,9 +74,7 @@ after pickup, and a vehicle can't be double-booked for overlapping dates.
 | `support/reviews/create/` | Logged in |
 | `support/`, `support/reply|close|delete/<id>/`, `support/analytics/`, `support/reviews/all|update|delete/` | Admin |
 
-## Production notes
+## Deployment
 
-Set `DJANGO_SECRET_KEY`, `DJANGO_DEBUG=0`, `DJANGO_ALLOWED_HOSTS` and
-`CORS_ALLOWED_ORIGINS` (see `backend/.env.example`). Media files are only served by
-Django when `DEBUG` is on; serve `backend/media/` from your web server in production,
-and enable HTTPS settings (`SECURE_SSL_REDIRECT`, secure cookies, HSTS).
+Supabase (database + image storage), Render (backend) and Vercel (frontend).
+Step-by-step guide: **[DEPLOY.md](DEPLOY.md)**.

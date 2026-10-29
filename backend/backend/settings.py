@@ -14,6 +14,8 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -39,6 +41,20 @@ ALLOWED_HOSTS = os.environ.get(
     'localhost,127.0.0.1'
 ).split(',')
 
+# Render sets this automatically to the service's own hostname (xxx.onrender.com).
+RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+
+if RENDER_EXTERNAL_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
+
+# Needed for the Django admin login form over HTTPS, e.g. "https://yatra-api.onrender.com".
+CSRF_TRUSTED_ORIGINS = [
+    origin for origin in os.environ.get('CSRF_TRUSTED_ORIGINS', '').split(',') if origin
+]
+
+if RENDER_EXTERNAL_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_EXTERNAL_HOSTNAME}')
+
 
 # Application definition
 
@@ -51,6 +67,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'storages',
 
     'rest_framework',
     'users',
@@ -65,6 +82,8 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    # Serves the collected static files (Django admin CSS/JS) in production.
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -96,10 +115,25 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-# SQLite by default so the project runs out of the box.
-# Set DB_ENGINE=postgres (plus DB_NAME / DB_USER / DB_PASSWORD / DB_HOST / DB_PORT) to use PostgreSQL.
+# Order of preference:
+#   1. DATABASE_URL (Supabase / Render), e.g. postgresql://user:pass@host:5432/postgres
+#   2. DB_ENGINE=postgres + DB_NAME / DB_USER / DB_PASSWORD / DB_HOST / DB_PORT
+#   3. SQLite file for local development (default)
 
-if os.environ.get('DB_ENGINE') == 'postgres':
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=60,
+            conn_health_checks=True,
+            ssl_require=os.environ.get('DB_SSL_REQUIRE', '1') == '1',
+        )
+    }
+    # Supabase's pooler (PgBouncer) does not support server-side cursors.
+    DATABASES['default']['DISABLE_SERVER_SIDE_CURSORS'] = True
+elif os.environ.get('DB_ENGINE') == 'postgres':
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -157,9 +191,60 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
 MEDIA_URL = '/media/'
 
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# =========================
+# FILE STORAGE
+# =========================
+# Uploaded images (vehicles, packages, drivers) go to Supabase Storage when its
+# S3 keys are set. Render's disk is wiped on every deploy, so production needs this.
+# Without the keys (local development) files are saved in backend/media/.
+
+SUPABASE_PROJECT_REF = os.environ.get('SUPABASE_PROJECT_REF', '')
+SUPABASE_STORAGE_BUCKET = os.environ.get('SUPABASE_STORAGE_BUCKET', 'media')
+
+USE_SUPABASE_STORAGE = bool(
+    SUPABASE_PROJECT_REF and os.environ.get('SUPABASE_S3_ACCESS_KEY_ID')
+)
+
+if USE_SUPABASE_STORAGE:
+    DEFAULT_FILE_STORAGE_BACKEND = {
+        'BACKEND': 'storages.backends.s3.S3Storage',
+        'OPTIONS': {
+            'bucket_name': SUPABASE_STORAGE_BUCKET,
+            'endpoint_url': f'https://{SUPABASE_PROJECT_REF}.supabase.co/storage/v1/s3',
+            'region_name': os.environ.get('SUPABASE_S3_REGION', 'ap-south-1'),
+            'access_key': os.environ.get('SUPABASE_S3_ACCESS_KEY_ID'),
+            'secret_key': os.environ.get('SUPABASE_S3_SECRET_ACCESS_KEY'),
+            'addressing_style': 'path',
+            'signature_version': 's3v4',
+            # Public bucket: serve plain public URLs instead of signed ones.
+            'querystring_auth': False,
+            'custom_domain': f'{SUPABASE_PROJECT_REF}.supabase.co/storage/v1/object/public/{SUPABASE_STORAGE_BUCKET}',
+            'file_overwrite': False,
+            'default_acl': None,
+        },
+    }
+else:
+    DEFAULT_FILE_STORAGE_BACKEND = {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    }
+
+STORAGES = {
+    'default': DEFAULT_FILE_STORAGE_BACKEND,
+    'staticfiles': {
+        # Compressed + cache-busted file names in production.
+        'BACKEND': (
+            'django.contrib.staticfiles.storage.StaticFilesStorage'
+            if DEBUG
+            else 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+        ),
+    },
+}
 
 REST_FRAMEWORK = {
 
@@ -235,3 +320,45 @@ EMAIL_BACKEND = (
 )
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER or 'noreply@yatra.local'
+
+
+# =========================
+# PRODUCTION SECURITY (DEBUG off)
+# =========================
+
+if not DEBUG:
+
+    # Render terminates HTTPS in front of Django.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+    SECURE_SSL_REDIRECT = os.environ.get('SECURE_SSL_REDIRECT', '1') == '1'
+
+    # Render's health check calls the service over plain HTTP internally.
+    SECURE_REDIRECT_EXEMPT = [r'^api/health/$']
+
+    SESSION_COOKIE_SECURE = True
+
+    CSRF_COOKIE_SECURE = True
+
+    # Start with one hour; raise once everything is confirmed working on HTTPS.
+    SECURE_HSTS_SECONDS = int(os.environ.get('SECURE_HSTS_SECONDS', '3600'))
+
+    SECURE_REFERRER_POLICY = 'same-origin'
+
+
+# =========================
+# LOGGING
+# =========================
+# Errors go to the console so they show up in Render's log viewer.
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': os.environ.get('LOG_LEVEL', 'INFO'),
+    },
+}

@@ -40,3 +40,6 @@ __pycache__/
 # Test / coverage output
 .coverage
 htmlcov/
+
+# Django collectstatic output
+backend/staticfiles/
